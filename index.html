@@ -97,35 +97,76 @@ input,select,textarea{width:100%;padding:12px;border:1px solid var(--bdr);border
 }
 @media(min-width:768px){.modal{align-items:center;padding:20px}.mc{border-radius:20px}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
 <script>
-const supabaseUrl='https://fgofdlkbuyzazmtaoxmc.supabase.co';
-const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnb2ZkbGtidXl6YXptdGFveG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODUwNjcsImV4cCI6MjA5MjE2MTA2N30.pnF7johXrd8Ns7EG09p-zyff9-7SVnNoGcFFFgK_XzA';
-const {createClient}=supabase;
-const dbClient=createClient(supabaseUrl,supabaseKey,{
-  global:{
-    headers:{
-      'apikey':supabaseKey,
-      'Authorization':'Bearer '+supabaseKey,
-      'X-Client-Info':'supabase-js/2.0.0'
-    },
-    fetch:(url,options={})=>{
-      return fetch(url,{
-        ...options,
-        credentials:'omit',
-        mode:'cors',
-        headers:{...(options.headers||{}),
-          'apikey':supabaseKey,
-          'Authorization':'Bearer '+supabaseKey
-        }
-      });
-    }
+// اتصال مباشر بـ Supabase بدون مكتبة خارجية
+var SB_URL='https://fgofdlkbuyzazmtaoxmc.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnb2ZkbGtidXl6YXptdGFveG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODUwNjcsImV4cCI6MjA5MjE2MTA2N30.pnF7johXrd8Ns7EG09p-zyff9-7SVnNoGcFFFgK_XzA';
+
+var SB_HEADERS={
+  'apikey':SB_KEY,
+  'Authorization':'Bearer '+SB_KEY,
+  'Content-Type':'application/json',
+  'Prefer':'return=representation'
+};
+
+// wrapper يحاكي supabase-js
+var dbClient={
+  from:function(table){
+    var base=SB_URL+'/rest/v1/'+table;
+    return {
+      select:function(cols){
+        var q=base+'?select='+(cols||'*');
+        return {
+          order:function(col,opts){
+            q+='&order='+col+(opts&&opts.ascending===false?'.desc':'.asc');
+            return this;
+          },
+          then:function(r){return fetch(q,{method:'GET',headers:SB_HEADERS}).then(function(res){return res.json().then(function(d){return res.ok?{data:d,error:null}:{data:[],error:d};});}).then(r);},
+          catch:function(r){return this.then(null).catch(r);}
+        };
+      },
+      insert:function(rows){
+        return {
+          select:function(){
+            return fetch(base,{method:'POST',headers:SB_HEADERS,body:JSON.stringify(rows)}).then(function(res){return res.json().then(function(d){return res.ok?{data:Array.isArray(d)?d:[d],error:null}:{data:null,error:d};});});
+          }
+        };
+      },
+      update:function(data){
+        return {
+          eq:function(col,val){
+            return fetch(base+'?'+col+'=eq.'+encodeURIComponent(val),{method:'PATCH',headers:SB_HEADERS,body:JSON.stringify(data)}).then(function(res){return res.ok?{error:null}:{error:{message:'Update failed '+res.status}};});
+          }
+        };
+      },
+      delete:function(){
+        return {
+          eq:function(col,val){
+            return fetch(base+'?'+col+'=eq.'+encodeURIComponent(val),{method:'DELETE',headers:SB_HEADERS}).then(function(res){return res.ok?{error:null}:{error:{message:'Delete failed '+res.status}};});
+          }
+        };
+      },
+      upsert:function(rows,opts){
+        var h=Object.assign({},SB_HEADERS,{'Prefer':'resolution=merge-duplicates,return=representation'});
+        if(opts&&opts.onConflict)h['Prefer']+=' on-conflict='+opts.onConflict;
+        return fetch(base,{method:'POST',headers:h,body:JSON.stringify(rows)}).then(function(res){return res.ok?{error:null}:{error:{message:'Upsert failed '+res.status}};});
+      }
+    };
   }
-});
+};
+
+// دالة مساعدة للتحميل
+function sbSelect(table, orderCol, orderDesc) {
+  var q = SB_URL+'/rest/v1/'+table+'?select=*';
+  if(orderCol) q += '&order='+orderCol+(orderDesc?'.desc':'.asc');
+  return fetch(q, {method:'GET', headers:SB_HEADERS})
+    .then(function(res){ return res.json().then(function(d){ return res.ok ? {data:d,error:null} : {data:[],error:d}; }); })
+    .catch(function(e){ return {data:[], error:e}; });
+}
 </script>
 
 <!-- شاشة التحميل -->
@@ -527,26 +568,25 @@ setInterval(function() {
 // ═══════════════════════════════════════════
 // تحميل آمن مع timeout
 // ═══════════════════════════════════════════
-function safeFetch(fn, label) {
-  return Promise.race([
-    fn(),
-    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('timeout')); }, 9000); })
-  ]).catch(function(e) {
-    console.warn('safeFetch [' + label + ']:', e.message);
-    return {data: [], error: e};
-  });
-}
+
 
 async function initApp() {
   showLoad('جاري تحميل البيانات...');
-  var r1 = await safeFetch(function() { return dbClient.from('students').select('*'); }, 'students');
-  db.students = r1.data || [];
-  var r2 = await safeFetch(function() { return dbClient.from('reports').select('*'); }, 'reports');
-  db.reports = r2.data || [];
-  var r3 = await safeFetch(function() { return dbClient.from('hifz').select('*'); }, 'hifz');
-  (r3.data || []).forEach(function(h) { db.hifzData[h.student_id + '_' + h.juz] = h.surahs || []; });
-  var r4 = await safeFetch(function() { return dbClient.from('adab_reports').select('*').order('id', {ascending: false}); }, 'adab_reports');
-  db.adabReports = r4.data || [];
+  try {
+    var r1 = await sbSelect('students');
+    db.students = r1.data || [];
+
+    var r2 = await sbSelect('reports');
+    db.reports = r2.data || [];
+
+    var r3 = await sbSelect('hifz');
+    (r3.data || []).forEach(function(h) { db.hifzData[h.student_id + '_' + h.juz] = h.surahs || []; });
+
+    var r4 = await sbSelect('adab_reports', 'id', true);
+    db.adabReports = r4.data || [];
+  } catch(e) {
+    console.error('initApp error:', e);
+  }
   hideLoad();
   document.getElementById('mosqueScreen').classList.remove('hidden');
 }
