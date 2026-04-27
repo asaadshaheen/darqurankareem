@@ -572,25 +572,43 @@ setInterval(function() {
 
 async function initApp() {
   showLoad('جاري تحميل البيانات...');
+
   try {
     var r1 = await sbSelect('students');
     db.students = r1.data || [];
+  } catch (e) {
+    db.students = [];
+    console.log('students error', e);
+  }
 
+  try {
     var r2 = await sbSelect('reports');
     db.reports = r2.data || [];
+  } catch (e) {
+    db.reports = [];
+    console.log('reports error', e);
+  }
 
+  try {
     var r3 = await sbSelect('hifz');
-    (r3.data || []).forEach(function(h) { db.hifzData[h.student_id + '_' + h.juz] = h.surahs || []; });
+    (r3.data || []).forEach(function (h) {
+      db.hifzData[h.student_id + '_' + h.juz] = h.surahs || [];
+    });
+  } catch (e) {
+    console.log('hifz error', e);
+  }
 
+  try {
     var r4 = await sbSelect('adab_reports', 'id', true);
     db.adabReports = r4.data || [];
-  } catch(e) {
-    console.error('initApp error:', e);
+  } catch (e) {
+    db.adabReports = [];
+    console.log('adab_reports error', e);
   }
+
   hideLoad();
   document.getElementById('mosqueScreen').classList.remove('hidden');
 }
-
 function setMosque(m) {
   db.mosque = m;
   document.getElementById('mosqueLabel').innerText = m;
