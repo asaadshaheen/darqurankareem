@@ -17,7 +17,12 @@ button { padding:8px 15px; }
 </head>
 <body>
 
-<h2>إضافة طالب</h2>
+<h2>📋 الطلاب</h2>
+<div id="students"></div>
+
+<hr>
+
+<h2>➕ إضافة طالب</h2>
 
 <input id="name" placeholder="الاسم">
 <input id="age" placeholder="العمر">
@@ -29,11 +34,6 @@ button { padding:8px 15px; }
 
 <button onclick="saveStudent()">حفظ</button>
 
-<hr>
-
-<h2>الطلاب</h2>
-<div id="students"></div>
-
 <script>
 
 const supabaseClient = supabase.createClient(
@@ -41,7 +41,37 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnb2ZkbGtidXl6YXptdGFveG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODUwNjcsImV4cCI6MjA5MjE2MTA2N30.pnF7johXrd8Ns7EG09p-zyff9-7SVnNoGcFFFgK_XzA"
 );
 
-// رفع الصورة
+// 🔥 عرض الطلاب أول
+async function loadStudents() {
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select('id,name,age,phone,notes,mosque,group_name,photo');
+
+  if (error) {
+    console.error("خطأ:", error);
+    alert("خطأ في تحميل الطلاب");
+    return;
+  }
+
+  const container = document.getElementById('students');
+  container.innerHTML = "";
+
+  data.forEach(s => {
+    container.innerHTML += `
+      <div class="card">
+        <img src="${s.photo || ''}">
+        <div>
+          <b>${s.name}</b><br>
+          العمر: ${s.age || ''}<br>
+          الحلقة: ${s.group_name || ''}<br>
+          الهاتف: ${s.phone || ''}
+        </div>
+      </div>
+    `;
+  });
+}
+
+// 🔥 رفع الصورة
 async function uploadImage(file) {
   const fileName = Date.now() + "_" + file.name;
 
@@ -50,7 +80,6 @@ async function uploadImage(file) {
     .upload(fileName, file);
 
   if (error) {
-    alert("خطأ في رفع الصورة");
     console.error(error);
     return null;
   }
@@ -62,7 +91,7 @@ async function uploadImage(file) {
   return data.publicUrl;
 }
 
-// حفظ الطالب
+// 🔥 إضافة طالب
 async function saveStudent() {
   const file = document.getElementById('photo').files[0];
   let imageUrl = null;
@@ -89,42 +118,12 @@ async function saveStudent() {
     console.error(error);
     alert("خطأ بالحفظ");
   } else {
-    alert("تم الحفظ ✅");
-    loadStudents();
+    alert("تمت الإضافة ✅");
+    loadStudents(); // تحديث القائمة
   }
 }
 
-// تحميل الطلاب
-async function loadStudents() {
-  const { data, error } = await supabaseClient
-    .from('students')
-    .select('id,name,age,phone,notes,mosque,group_name,photo');
-
-  if (error) {
-    console.error("Supabase error:", error);
-    alert("خطأ في تحميل الطلاب");
-    return;
-  }
-
-  const container = document.getElementById('students');
-  container.innerHTML = "";
-
-  data.forEach(s => {
-    container.innerHTML += `
-      <div class="card">
-        <img src="${s.photo || ''}">
-        <div>
-          <b>${s.name}</b><br>
-          العمر: ${s.age}<br>
-          الحلقة: ${s.group_name}<br>
-          الهاتف: ${s.phone}
-        </div>
-      </div>
-    `;
-  });
-}
-
-// تشغيل أولي
+// 🚀 أول ما تفتح الصفحة
 loadStudents();
 
 </script>
