@@ -164,7 +164,7 @@ function sbSelect(table, orderCol, orderDesc) {
 
   var selectCols = '*';
   if (table === 'students') {
-    selectCols = 'id,name,age,phone,photo,notes,attendance,evaluation,mosque,group_name';
+    selectCols = 'id,name,age,phone,photo,notes,mosque,group_name';
   }
 
   var q = SB_URL + '/rest/v1/' + table + '?select=' + selectCols;
@@ -597,6 +597,7 @@ async function initApp() {
   showLoad('جاري تحميل البيانات...');
   try {
     var r1 = await sbSelect('students');
+    if (r1.error) { console.error('Supabase select error students', r1.error); alert('خطأ في تحميل الطلاب من Supabase: ' + (r1.error.message || r1.error.code || JSON.stringify(r1.error))); }
     db.students = normalizeStudents(r1.data || []);
 
     var r2 = await sbSelect('reports');
