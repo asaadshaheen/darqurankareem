@@ -165,9 +165,9 @@ function sbSelect(table, orderCol, orderDesc) {
   var selectCols = '*';
 
   if (table === 'students') {
-    // لا نقرأ عمود photo هنا لأن الصور القديمة بصيغة base64 تسبب timeout في Supabase
-    // الصور الجديدة تُحفظ كرابط Storage، ويمكن إظهارها لاحقاً بعد تنظيف الصور القديمة
-    selectCols = 'id,name,age,phone,notes,mosque,group_name';
+    // نقرأ photo الآن بشرط تنظيف الصور القديمة base64 من Supabase
+    // نفّذ SQL المرفق مرة واحدة حتى لا يحدث timeout
+    selectCols = 'id,name,age,phone,notes,mosque,group_name,photo';
   }
 
   var q = SB_URL + '/rest/v1/' + table + '?select=' + selectCols;
@@ -296,6 +296,7 @@ function sbSelect(table, orderCol, orderDesc) {
     <label>رقم هاتف ولي الأمر</label><input type="tel" id="sPhone" required>
     <label>المجموعة</label><select id="sGroup"></select>
     <label>الصورة الشخصية</label><input type="file" id="sPhoto" accept="image/*" onchange="encodeImg(this)">
+    <div style="font-size:.8rem;color:#64748b;margin-top:4px">الصور الجديدة تُحفظ في Supabase Storage كرابط وتبقى بعد الخروج.</div>
     <div style="display:flex;gap:10px;margin-top:20px">
       <button type="submit" class="btn btn-primary" style="flex:1">حفظ البيانات</button>
       <button type="button" class="btn btn-danger" style="flex:1" onclick="closeStdModal()">إلغاء</button>
@@ -582,7 +583,7 @@ function absLv(n) { return n >= 8 ? 'ab-high' : n >= 5 ? 'ab-mid' : 'ab-low'; }
 function absLbl(n) { return n >= 8 ? 'غياب متكرر' : n >= 5 ? 'يحتاج متابعة' : 'منتظم'; }
 
 // توافق مع قاعدة البيانات: اسم عمود المجموعة في Supabase هو group_name
-function sg(s) { return s ? (s.group_name || sg(s) || '') : ''; }
+function sg(s) { return s ? (s.group_name || s.group || '') : ''; }
 
 // رفع صورة الطالب إلى Supabase Storage bucket: students
 async function uploadStudentPhoto(file) {
