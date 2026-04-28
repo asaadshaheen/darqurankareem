@@ -165,7 +165,7 @@ function sbSelect(table, orderCol, orderDesc) {
   var selectCols = '*';
 
   if (table === 'students') {
-    selectCols = 'id,name,age,phone,group,photo,notes,attendance,evaluation,mosque';
+    selectCols = 'id,name,age,phone,group,photo,notes,mosque';
   }
 
   var q = SB_URL + '/rest/v1/' + table + '?select=' + selectCols;
