@@ -161,11 +161,31 @@ var dbClient={
 
 // دالة مساعدة للتحميل
 function sbSelect(table, orderCol, orderDesc) {
-  var q = SB_URL + '/rest/v1/' + table + '?select=id,name,age,phone,group,photo,notes,attendance,evaluation,mosque';
-  if(orderCol) q += '&order='+orderCol+(orderDesc?'.desc':'.asc');
-  return fetch(q, {method:'GET', headers:SB_HEADERS})
-    .then(function(res){ return res.json().then(function(d){ return res.ok ? {data:d,error:null} : {data:[],error:d}; }); })
-    .catch(function(e){ return {data:[], error:e}; });
+
+  var selectCols = '*';
+
+  if (table === 'students') {
+    selectCols = 'id,name,age,phone,group,photo,notes,attendance,evaluation,mosque';
+  }
+
+  var q = SB_URL + '/rest/v1/' + table + '?select=' + selectCols;
+
+  if (orderCol) {
+    q += '&order=' + orderCol + (orderDesc ? '.desc' : '.asc');
+  }
+
+  return fetch(q, {
+    method: 'GET',
+    headers: SB_HEADERS
+  })
+  .then(function(res){
+    return res.json().then(function(d){
+      return res.ok ? {data:d,error:null} : {data:[],error:d};
+    });
+  })
+  .catch(function(e){
+    return {data:[],error:e};
+  });
 }
 </script>
 
