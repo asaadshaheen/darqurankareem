@@ -166,8 +166,9 @@ var dbClient={
       },
       upsert:function(rows,opts){
         var h=Object.assign({},SB_HEADERS,{'Prefer':'resolution=merge-duplicates,return=representation'});
-        if(opts&&opts.onConflict)h['Prefer']+=' on-conflict='+opts.onConflict;
-        return fetch(base,{method:'POST',headers:h,body:JSON.stringify(rows)}).then(function(res){return res.ok?{error:null}:{error:{message:'Upsert failed '+res.status}};});
+        var url = base;
+        if (opts && opts.onConflict) url += '?on_conflict=' + encodeURIComponent(opts.onConflict);
+        return fetch(url,{method:'POST',headers:h,body:JSON.stringify(rows)}).then(function(res){return res.ok?{error:null}:{error:{message:'Upsert failed '+res.status}};});
       }
     };
   }
@@ -280,8 +281,6 @@ function sbSelect(table, orderCol, orderDesc) {
       <button id="hifzAmmaBtn"        class="btn btn-purple  hidden" onclick="openHifz('عم')">📖 جزء عم</button>
       <button id="hifzTabarakBtn"     class="btn btn-indigo  hidden" onclick="openHifz('تبارك')">📖 تبارك</button>
       <button id="adabBtn"            class="btn btn-rose    hidden" onclick="openAdab()">🌟 الآداب والأخلاق</button>
-      <button id="tajweedBtn"         class="btn btn-indigo  hidden" onclick="openTajweed()">📘 أحكام التجويد</button>
-      <button id="tilawahBtn"         class="btn btn-orange  hidden" onclick="openTilawah()">🎙️ تصحيح التلاوة</button>
       <button id="qiraahBtn"          class="btn btn-orange  hidden" onclick="openQiraah()">📘 أحكام التجويد و تصحيح التلاوة</button>
       <button id="statsChartBtn"      class="btn btn-cyan    hidden" onclick="openStatsChart()">📈 الإحصائيات البيانية</button>
       <button id="hifzAchieveBtn"     class="btn btn-lime    hidden" onclick="openHifzAchieve()">🏆 إنجاز الحفظ</button>
@@ -541,9 +540,25 @@ function sbSelect(table, orderCol, orderDesc) {
 </div></div>
 
 <div id="qiraahArchModal" class="modal hidden"><div class="mc" style="max-width:760px">
-  <h2 style="color:#ea580c">📋 سجلات أحكام التجويد و تصحيح التلاوة</h2>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
+    <h2 style="color:#ea580c">📋 سجلات أحكام التجويد و تصحيح التلاوة</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-gold" style="min-height:38px" onclick="printAllQiraah()">🖨️ طباعة الكل</button>
+      <button class="btn btn-danger" style="min-height:38px" onclick="closeQiraahArch()">إغلاق</button>
+    </div>
+  </div>
   <div id="qiraahArchGrid" class="rep-grid"></div>
-  <button class="btn btn-danger btn-block" style="margin-top:20px" onclick="closeQiraahArch()">إغلاق</button>
+</div></div>
+
+<div id="qiraahViewModal" class="modal hidden"><div class="mc" style="max-width:760px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
+    <h2 id="qiraahViewTitle" style="color:#ea580c">تفاصيل الكشف</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-gold" style="min-height:38px" onclick="printQiraahView()">🖨️ طباعة</button>
+      <button class="btn btn-danger" style="min-height:38px" onclick="closeQiraahView()">إغلاق</button>
+    </div>
+  </div>
+  <div id="qiraahViewContent"></div>
 </div></div>
 
 <!-- Modal: أحكام التجويد -->
@@ -624,6 +639,7 @@ const PCSS = [
   ".bb{flex:1;background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden}",
   ".bf{height:100%;border-radius:4px}",
   ".bv{width:50px;font-size:11px;text-align:left}",
+  ".page-break{page-break-after:always;break-after:page}",
   "@page{margin:8mm;size:A4 portrait}"
 ].join('');
 
@@ -798,23 +814,19 @@ function showDashboard() {
   document.getElementById('userNameDisplay').innerText = dn;
   document.getElementById('mosqueNameDisplay').innerText = db.mosque;
   if (db.user.role === 'admin') {
-    ['adminArchiveBtn','adminStatsBtn','adminPrintBtn','addStdBtn','adminStats','adabBtn','tajweedBtn','tilawahBtn','statsChartBtn','hifzAchieveBtn'].forEach(function(id) { document.getElementById(id).classList.remove('hidden'); });
+    ['adminArchiveBtn','adminStatsBtn','adminPrintBtn','addStdBtn','adminStats','adabBtn','statsChartBtn','hifzAchieveBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
   } else if (db.user.role === 'teacher') {
-    ['teacherRecordBtn','teacherArchiveBtn','teacherStatsBtn','teacherPrintBtn','addStdBtn','adabBtn','statsChartBtn','hifzAchieveBtn'].forEach(function(id) { document.getElementById(id).classList.remove('hidden'); });
+    ['teacherRecordBtn','teacherArchiveBtn','teacherStatsBtn','teacherPrintBtn','addStdBtn','adabBtn','statsChartBtn','hifzAchieveBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
     var cnt = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === db.user.group; }).length;
     document.getElementById('teacherCount').innerText = cnt;
     document.getElementById('teacherGroupLabel').innerText = db.user.group;
     document.getElementById('teacherStatCard').classList.remove('hidden');
-    if (db.user.group === 'مجموعة أهل القرآن') {
-      document.getElementById('tajweedBtn').classList.remove('hidden');
-      document.getElementById('tilawahBtn').classList.remove('hidden');
-    }
     if (db.user.username === 'yousef' || db.user.username === 'khalil' || db.user.user === 'yousef' || db.user.user === 'khalil') {
-      document.getElementById('qiraahBtn').classList.remove('hidden');
+      var qb=document.getElementById('qiraahBtn'); if(qb) qb.classList.remove('hidden');
     }
     if (db.user.username === 'asaad' || db.user.user === 'asaad' || db.user.group === 'مجموعة الأشبال') {
-      document.getElementById('hifzAmmaBtn').classList.remove('hidden');
-      document.getElementById('hifzTabarakBtn').classList.remove('hidden');
+      var ha=document.getElementById('hifzAmmaBtn'); if(ha) ha.classList.remove('hidden');
+      var ht=document.getElementById('hifzTabarakBtn'); if(ht) ht.classList.remove('hidden');
     }
   }
   refreshDash();
@@ -1497,38 +1509,94 @@ async function saveQiraahSheet() {
   document.getElementById('qiraahSheetModal').classList.add('hidden');
 }
 
+var activeQiraahViewId = null;
+
+function getQiraahReps() {
+  return (db.qiraahReports || []).filter(function(r) {
+    return r.mosque === db.mosque && (db.user.role === 'admin' || r.group_name === db.user.group);
+  }).sort(function(a,b){ return b.id - a.id; });
+}
+
 function openQiraahArchive() {
   var grid = document.getElementById('qiraahArchGrid');
   grid.innerHTML = '';
-  var reps = (db.qiraahReports || []).filter(function(r) {
-    return r.mosque === db.mosque && r.group_name === db.user.group;
-  });
+  var reps = getQiraahReps();
 
   if (!reps.length) {
     grid.innerHTML = '<p style="text-align:center;color:var(--gray);padding:20px">لا توجد سجلات</p>';
   }
 
   reps.forEach(function(r) {
-    var body = '';
-    Object.entries(r.students_data || {}).forEach(function(e) {
-      var s = db.students.find(function(x) { return x.id == e[0]; });
-      var d = e[1] || {};
-      body += '<div class="next-box"><b>' + (s ? s.name : 'محذوف') + '</b><br>'
-        + 'القراءة: ' + (d.reading || '-') + '<br>'
-        + 'التقييم: ' + (d.rating || '-') + '<br>'
-        + 'القراءة في المرة القادمة: ' + (d.next || '-') + '</div>';
-    });
-
     var card = document.createElement('div');
     card.className = 'rep-card';
-    card.innerHTML = '<b style="color:#ea580c">' + r.report_date + '</b>'
-      + '<p style="font-size:.8rem">بإشراف: ' + r.teacher_name + '</p>' + body;
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">'
+      + '<b style="color:#ea580c">' + r.group_name + '</b><small>' + r.report_date + '</small></div>'
+      + '<p style="font-size:.8rem">بإشراف: ' + (r.teacher_name || '-') + '</p>'
+      + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+      + '<button class="btn btn-orange" style="flex:1" onclick="viewQiraahRep(' + r.id + ')">عرض</button>'
+      + '<button class="btn btn-gold" style="flex:1" onclick="printQiraahRep(' + r.id + ')">طباعة</button>'
+      + '</div>';
     grid.appendChild(card);
   });
 
   document.getElementById('qiraahArchModal').classList.remove('hidden');
 }
+
 function closeQiraahArch() { if (confirmExit()) document.getElementById('qiraahArchModal').classList.add('hidden'); }
+
+function viewQiraahRep(id) {
+  activeQiraahViewId = id;
+  var r = db.qiraahReports.find(function(x){ return x.id == id; });
+  if (!r) return;
+  document.getElementById('qiraahViewTitle').innerText = 'كشف القراءة — ' + r.group_name + ' (' + r.report_date + ')';
+  var html = '';
+  Object.entries(r.students_data || {}).forEach(function(e) {
+    var s = db.students.find(function(x){ return x.id == e[0]; });
+    var d = e[1] || {};
+    html += '<div class="next-box"><b>' + (s ? s.name : 'محذوف') + '</b><br>'
+      + '<b>القراءة:</b> ' + (d.reading || '-') + '<br>'
+      + '<b>التقييم:</b> ' + (d.rating || '-') + '<br>'
+      + '<b>القراءة في المرة القادمة:</b> ' + (d.next || '-') + '</div>';
+  });
+  document.getElementById('qiraahViewContent').innerHTML = html || '<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات</p>';
+  document.getElementById('qiraahViewModal').classList.remove('hidden');
+}
+
+function closeQiraahView() { if (confirmExit()) document.getElementById('qiraahViewModal').classList.add('hidden'); }
+function printQiraahView() { printQiraahRep(activeQiraahViewId); }
+
+function buildQiraahPrintHtml(reps, titleText) {
+  var html = '';
+  reps.forEach(function(r, ri) {
+    var entries = Object.entries(r.students_data || {});
+    for (var i = 0; i < entries.length; i += 10) {
+      var chunk = entries.slice(i, i + 10);
+      var rows = '';
+      chunk.forEach(function(e, idx) {
+        var st = db.students.find(function(x){ return x.id == e[0]; });
+        var d = e[1] || {};
+        rows += '<tr><td style="text-align:center">' + (i + idx + 1) + '</td><td style="font-weight:bold">' + (st ? st.name : 'محذوف') + '</td><td>' + (d.reading || '-') + '</td><td style="text-align:center">' + (d.rating || '-') + '</td><td>' + (d.next || '-') + '</td></tr>';
+      });
+      html += '<div class="ph"><h1>دار القرآن الكريم — ' + r.mosque + '</h1><p><b>' + titleText + '</b></p><p>المجموعة: ' + r.group_name + ' | التاريخ: ' + r.report_date + ' | المعلم: ' + (r.teacher_name || '-') + '</p></div>'
+        + '<table><thead><tr><th style="width:5%">#</th><th style="width:25%">اسم الطالب</th><th style="width:25%">القراءة</th><th style="width:15%">التقييم</th><th style="width:30%">القراءة في المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>صفحة تحتوي حتى 10 طلاب</span></div>';
+      if (!(ri === reps.length - 1 && i + 10 >= entries.length)) html += '<div class="page-break"></div>';
+    }
+  });
+  return html || '<p>لا توجد بيانات للطباعة</p>';
+}
+
+function printQiraahRep(id) {
+  var r = db.qiraahReports.find(function(x){ return x.id == id; });
+  if (!r) return;
+  doPrint(buildQiraahPrintHtml([r], 'كشف أحكام التجويد و تصحيح التلاوة'), 'كشف القراءة');
+}
+
+function printAllQiraah() {
+  var reps = getQiraahReps();
+  if (!reps.length) { alert('لا توجد سجلات للطباعة'); return; }
+  doPrint(buildQiraahPrintHtml(reps, 'سجلات أحكام التجويد و تصحيح التلاوة'), 'طباعة كل سجلات القراءة');
+}
 
 // ═══════════════════════════════════════════
 // أحكام التجويد وتصحيح التلاوة - مجموعة أهل القرآن
