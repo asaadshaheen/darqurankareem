@@ -646,9 +646,8 @@ const PCSS = [
 function doPrint(html, title) {
   var w = window.open('', '_blank', 'width=820,height=650');
   if (!w) { alert('يرجى السماح بالنوافذ المنبثقة ثم حاول مجدداً'); return; }
-  w.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '</style></head><body>' + html + '</body></html>');
+  w.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">⬅ رجوع</button><button class="print-btn" onclick="window.print()">🖨️ طباعة</button></div>' + html + '</body></html>');
   w.document.close();
-  w.onload = function() { setTimeout(function() { w.focus(); w.print(); }, 700); };
 }
 
 // ═══════════════════════════════════════════
@@ -691,28 +690,28 @@ window.adabData = {};
 function getGroup(s) { return s ? (s.group_name || s.group || '') : ''; }
 function setGroupPayload(p, val) { p.group_name = val; return p; }
 function normalizePhone(v) { return String(v || '').replace(/[^0-9]/g, ''); }
-function hifzRatingScore(r) {
-  if (r === 'ممتاز') return 3;
-  if (r === 'جيد جداً') return 2;
-  if (r === 'جيد') return 1;
-  if (r === 'يحتاج تحسين' || r === 'يحتاج متابعة') return -1;
-  if (r === 'تراجع') return -2;
-  return 0;
+function getPagesDoneValue(d) {
+  if (!d) return 0;
+  var n = parseFloat(d.pages_done || d.pagesDone || 0);
+  return isNaN(n) ? 0 : n;
 }
-function hifzTypeLabel(t) {
-  return t === 'pages' ? 'صفحات' : t === 'juz' ? 'أجزاء' : t === 'surah' ? 'سور' : '-';
+function getTotalPages(studentId) {
+  var total = 0;
+  db.reports.forEach(function(r) {
+    if (r.mosque === db.mosque && r.students_data && r.students_data[studentId]) {
+      total += getPagesDoneValue(r.students_data[studentId]);
+    }
+  });
+  return total;
 }
 function getHifzTrendData(sid) {
-  var reps = db.reports.filter(function(r){
-    return r.mosque === db.mosque && r.students_data && r.students_data[sid] && r.students_data[sid].hifz_new;
-  }).sort(function(a,b){ return a.id - b.id; });
   var total = 0;
-  return reps.map(function(r){
-    var h = r.students_data[sid].hifz_new || {};
-    var score = hifzRatingScore(h.rating);
-    if (h.status === 'تراجع') score = -2;
-    total += score;
-    return {date:r.report_date, score:total, raw:score, h:h};
+  return db.reports.filter(function(r){
+    return r.mosque === db.mosque && r.students_data && r.students_data[sid] && getPagesDoneValue(r.students_data[sid]) > 0;
+  }).sort(function(a,b){ return a.id - b.id; }).map(function(r){
+    var pages = getPagesDoneValue(r.students_data[sid]);
+    total += pages;
+    return {date:r.report_date, pages:pages, total:total, data:r.students_data[sid]};
   });
 }
 
@@ -987,115 +986,58 @@ function filterAttRows() {
 }
 
 function openAttSheet(forced, rId) {
-  curAttRepId = rId || null; curAttGroup = forced || db.user.group;
+  curAttRepId = rId || null;
+  curAttGroup = forced || db.user.group;
   var students = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === curAttGroup; });
-  var showAdvancedHifz = curAttGroup !== 'مجموعة الأشبال';
-  var cont = document.getElementById('attRows'); cont.innerHTML = ''; window.attData = {};
+  var cont = document.getElementById('attRows');
+  cont.innerHTML = '';
+  window.attData = {};
   document.getElementById('attSearch').value = '';
   var existing = rId ? db.reports.find(function(r) { return r.id == rId; }) : null;
   var exData = existing ? (existing.students_data || {}) : null;
   document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (' + curAttGroup + ')';
 
   students.forEach(function(s) {
-    var defVal = {status:'present', today:'', required:'', rating:'ممتاز', revision:[], achievePages:[], achieveJuz:[], achieveFrom:1, achieveTo:1, hifz_new:{type:'pages', from:'', to:'', rating:'ممتاز', status:'تحسن', next:''}};
-    var val = exData ? (exData[s.id] || defVal) : defVal;
-    if (!val.revision) val.revision = [];
-    if (!val.achievePages) val.achievePages = [];
-    if (!val.achieveJuz) val.achieveJuz = [];
+    var defVal = {status:'present', today:'', follow_type:'حفظ', pages_done:'', rating:'ممتاز', required:''};
+    var val = exData ? Object.assign({}, defVal, (exData[s.id] || {})) : defVal;
+    if (!val.follow_type) val.follow_type = 'حفظ';
+    if (val.pages_done === undefined || val.pages_done === null) val.pages_done = '';
 
-    var revChecked = val.revision;
-    var revHTML = AJZAA.map(function(j) {
-      var chk = revChecked.includes(j) ? ' checked' : '';
-      return '<label style="display:flex;align-items:center;gap:5px;font-size:.82rem;cursor:pointer;padding:3px"><input type="checkbox" value="' + j + '"' + chk + ' onchange="toggleRev(' + s.id + ',this)"> ' + j + '</label>';
-    }).join('');
-
-    var hasJuz = val.achieveJuz && val.achieveJuz.length > 0;
-    var hasPg = val.achievePages && val.achievePages.length > 0;
-    var modeNone = !hasJuz && !hasPg;
-
-    var juzOpts = AJZAA.map(function(j) {
-      var chk = val.achieveJuz && val.achieveJuz.includes(j) ? ' checked' : '';
-      return '<label style="display:flex;align-items:center;gap:5px;font-size:.82rem;cursor:pointer;background:#f8fafc;padding:5px;border-radius:6px"><input type="checkbox" value="' + j + '"' + chk + ' onchange="toggleAchJuz(' + s.id + ',this)"> ' + j + '</label>';
-    }).join('');
-
-    var pgFrom = val.achieveFrom || 1; var pgTo = val.achieveTo || 1;
-    var pgFromOpts = ''; var pgToOpts = '';
-    for (var pi = 1; pi <= 604; pi++) {
-      pgFromOpts += '<option value="' + pi + '"' + (pgFrom == pi ? ' selected' : '') + '>' + pi + '</option>';
-      pgToOpts += '<option value="' + pi + '"' + (pgTo == pi ? ' selected' : '') + '>' + pi + '</option>';
-    }
-
-    var hn = val.hifz_new || {type:'pages', from:'', to:'', rating:'ممتاز', status:'تحسن', next:''};
-    var newHifzHTML = '<details style="margin-top:8px;border:1px solid var(--bdr);border-radius:8px;padding:10px">'
-      + '<summary style="font-weight:bold;cursor:pointer;color:#4d7c0f">📈 إنجاز الحفظ المطور</summary>'
-      + '<label>نوع الإنجاز:</label><select onchange="window.attData[' + s.id + '].hifz_new.type=this.value">'
-      + '<option value="pages"' + (hn.type==='pages'?' selected':'') + '>صفحات</option>'
-      + '<option value="surah"' + (hn.type==='surah'?' selected':'') + '>سور</option>'
-      + '<option value="juz"' + (hn.type==='juz'?' selected':'') + '>أجزاء</option>'
-      + '</select>'
-      + '<div style="display:flex;gap:10px;flex-wrap:wrap">'
-      + '<div style="flex:1"><label>من:</label><input type="text" value="' + (hn.from||'') + '" oninput="window.attData[' + s.id + '].hifz_new.from=this.value"></div>'
-      + '<div style="flex:1"><label>إلى:</label><input type="text" value="' + (hn.to||'') + '" oninput="window.attData[' + s.id + '].hifz_new.to=this.value"></div>'
-      + '</div>'
-      + '<label>حالة الإنجاز:</label><select onchange="window.attData[' + s.id + '].hifz_new.status=this.value">'
-      + '<option value="تحسن"' + (hn.status==='تحسن'?' selected':'') + '>تحسن / صعود</option>'
-      + '<option value="ثابت"' + (hn.status==='ثابت'?' selected':'') + '>ثابت</option>'
-      + '<option value="تراجع"' + (hn.status==='تراجع'?' selected':'') + '>تراجع / نزول</option>'
-      + '</select>'
-      + '<label>التقييم:</label><select onchange="window.attData[' + s.id + '].hifz_new.rating=this.value">'
-      + RATINGS.concat(['تراجع']).map(function(r) { return '<option value="' + r + '"' + (hn.rating===r?' selected':'') + '>' + r + '</option>'; }).join('')
-      + '</select>'
-      + '<label>ما سيكون عليه المرة القادمة:</label><input type="text" value="' + (hn.next||'') + '" oninput="window.attData[' + s.id + '].hifz_new.next=this.value">'
-      + '</details>';
-
-
-    var attHTML = '<div class="att-row" id="attRow_' + s.id + '">'
-      + '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
-      + '<b>' + s.name + '</b>'
-      + '<select class="att-sel" style="min-width:130px;margin:0" onchange="window.attData[' + s.id + '].status=this.value;updateAttRow(' + s.id + ')">'
-      + '<option value="present"' + (val.status === 'present' ? ' selected' : '') + '>حاضر</option>'
-      + '<option value="absent"' + (val.status === 'absent' ? ' selected' : '') + '>غائب</option>'
-      + '<option value="absent_excused"' + (val.status === 'absent_excused' ? ' selected' : '') + '>غائب بعذر</option>'
-      + '</select></div>'
-      + '<div class="hide-absent">'
-      + '<label>ماذا سمع اليوم:</label><input type="text" value="' + (val.today || '') + '" oninput="window.attData[' + s.id + '].today=this.value">'
-      + '<label>التقييم:</label>'
-      + '<select onchange="window.attData[' + s.id + '].rating=this.value">'
-      + RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('')
-      + '</select>'
-      + '<label>التسميع المطلوب:</label><input type="text" value="' + (val.required || '') + '" oninput="window.attData[' + s.id + '].required=this.value">'
-      + (showAdvancedHifz ? '<details style="margin-top:10px;border:1px solid var(--bdr);border-radius:8px;padding:10px">' : '')
-      + (showAdvancedHifz ? '<summary style="font-weight:bold;cursor:pointer;color:var(--primary)">📚 المراجعة</summary>' : '')
-      + (showAdvancedHifz ? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px;margin-top:8px;max-height:180px;overflow-y:auto">' + revHTML + '</div>' : '')
-      + (showAdvancedHifz ? '</details>' : '')
-      + (showAdvancedHifz ? '<details style="margin-top:8px;border:1px solid var(--bdr);border-radius:8px;padding:10px">' : '')
-      + (showAdvancedHifz ? '<summary style="font-weight:bold;cursor:pointer;color:#4d7c0f">🏆 إنجاز الحفظ</summary>' : '')
-      + '<div style="margin-top:10px">'
-      + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px"><input type="radio" name="ach_' + s.id + '" value="none"' + (modeNone ? ' checked' : '') + ' onchange="setAchMode(' + s.id + ',\'none\')"> لا يوجد</label>'
-      + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px"><input type="radio" name="ach_' + s.id + '" value="juz"' + (hasJuz ? ' checked' : '') + ' onchange="setAchMode(' + s.id + ',\'juz\')"> أجزاء كاملة</label>'
-      + '<div id="achJuz_' + s.id + '" style="' + (hasJuz ? '' : 'display:none') + '">'
-      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px;margin-top:6px;max-height:160px;overflow-y:auto;background:#f8fafc;padding:8px;border-radius:8px">' + juzOpts + '</div>'
-      + '</div>'
-      + '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:8px;margin-bottom:6px"><input type="radio" name="ach_' + s.id + '" value="pages"' + (hasPg ? ' checked' : '') + ' onchange="setAchMode(' + s.id + ',\'pages\')"> صفحات (أقل من جزء)</label>'
-      + '<div id="achPg_' + s.id + '" style="' + (hasPg ? '' : 'display:none') + '">'
-      + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">'
-      + '<div style="flex:1;min-width:100px"><label style="font-size:.85rem">من صفحة:</label><select id="achFrom_' + s.id + '" style="margin-top:4px" onchange="updateAchPg(' + s.id + ')">' + pgFromOpts + '</select></div>'
-      + '<div style="flex:1;min-width:100px"><label style="font-size:.85rem">إلى صفحة:</label><select id="achTo_' + s.id + '" style="margin-top:4px" onchange="updateAchPg(' + s.id + ')">' + pgToOpts + '</select></div>'
-      + '</div>'
-      + '<div id="achPgSum_' + s.id + '" style="margin-top:6px;font-size:.85rem;color:#4d7c0f;font-weight:bold"></div>'
-      + (showAdvancedHifz ? '</div></div></details>' + newHifzHTML : '') + '</div></div>';
+    var attHTML = '<div class="att-row" id="attRow_' + s.id + '">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">' +
+      '<b>' + s.name + '</b>' +
+      '<select class="att-sel" style="min-width:130px;margin:0" onchange="window.attData[' + s.id + '].status=this.value;updateAttRow(' + s.id + ')">' +
+      '<option value="present"' + (val.status === 'present' ? ' selected' : '') + '>حاضر</option>' +
+      '<option value="absent"' + (val.status === 'absent' ? ' selected' : '') + '>غائب</option>' +
+      '<option value="absent_excused"' + (val.status === 'absent_excused' ? ' selected' : '') + '>غائب بعذر</option>' +
+      '</select></div>' +
+      '<div class="hide-absent">' +
+      '<label>نوع المتابعة:</label>' +
+      '<select onchange="window.attData[' + s.id + '].follow_type=this.value">' +
+      ['حفظ','مراجعة','تلاوة'].map(function(t){ return '<option value="' + t + '"' + (val.follow_type === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
+      '</select>' +
+      '<label>ما تم اليوم:</label><input type="text" value="' + (val.today || '') + '" placeholder="مثال: سورة النبأ 1-10" oninput="window.attData[' + s.id + '].today=this.value">' +
+      '<label>عدد الصفحات المنجزة اليوم:</label><input type="number" min="0" step="0.5" value="' + (val.pages_done || '') + '" placeholder="مثال: 2" oninput="window.attData[' + s.id + '].pages_done=this.value">' +
+      '<label>التقييم:</label>' +
+      '<select onchange="window.attData[' + s.id + '].rating=this.value">' +
+      RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+      '</select>' +
+      '<label>المطلوب للمرة القادمة:</label><input type="text" value="' + (val.required || '') + '" placeholder="مثال: النازعات 1-10" oninput="window.attData[' + s.id + '].required=this.value">' +
+      '</div></div>';
 
     cont.innerHTML += attHTML;
     window.attData[s.id] = {
-      status: val.status, today: val.today || '', required: val.required || '', rating: val.rating || 'ممتاز',
-      revision: revChecked.slice(), achievePages: (val.achievePages || []).slice(),
-      achieveJuz: (val.achieveJuz || []).slice(), achieveFrom: val.achieveFrom || 1, achieveTo: val.achieveTo || 1, hifz_new: JSON.parse(JSON.stringify(hn))
+      status: val.status || 'present',
+      follow_type: val.follow_type || 'حفظ',
+      today: val.today || '',
+      pages_done: val.pages_done || '',
+      rating: val.rating || 'ممتاز',
+      required: val.required || ''
     };
     if (val.status === 'absent' || val.status === 'absent_excused') {
       var rowEl = document.getElementById('attRow_' + s.id);
       if (rowEl) rowEl.classList.add('is-absent');
     }
-    if (hasPg) updateAchPgSum(s.id);
   });
   document.getElementById('attModal').classList.remove('hidden');
 }
@@ -1176,7 +1118,10 @@ function showHistory(id) {
     if (h.status === 'present') {
       extra = '<p style="font-size:.85rem;margin-top:5px"><b>سمع:</b> ' + (h.today||'-') + '</p>'
         + '<p style="font-size:.85rem"><b>التقييم:</b> ' + h.rating + '</p>'
-        + '<p style="font-size:.85rem"><b>التسميع المطلوب:</b> ' + (h.required||'-') + '</p>';
+        + '<p style="font-size:.85rem"><b>النوع:</b> ' + (h.follow_type||'حفظ') + '</p>'
+        + '<p style="font-size:.85rem"><b>التقييم:</b> ' + (h.rating||'-') + '</p>'
+        + '<p style="font-size:.85rem"><b>عدد الصفحات:</b> ' + (h.pages_done||0) + '</p>'
+        + '<p style="font-size:.85rem"><b>المرة القادمة:</b> ' + (h.required||'-') + '</p>';
       if (h.revision && h.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + h.revision.join('، ') + '</p>';
       if (h.achieveJuz && h.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء المحفوظة:</b> ' + h.achieveJuz.join('، ') + '</p>';
       if (h.achievePages && h.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + h.achieveFrom + ' → ص' + h.achieveTo + ' (' + h.achievePages.length + ' صفحة)</p>';
@@ -1251,7 +1196,7 @@ function renderRepDetail(entries, r) {
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
     var extra = '';
     if (att.status === 'present') {
-      extra = '<p style="font-size:.85rem"><b>سمع:</b> ' + (att.today||'-') + '</p><p style="font-size:.85rem"><b>التقييم:</b> ' + att.rating + '</p><p style="font-size:.85rem"><b>التسميع المطلوب:</b> ' + (att.required||'-') + '</p>';
+      extra = '<p style="font-size:.85rem"><b>ما تم:</b> ' + (att.today||'-') + '</p><p style="font-size:.85rem"><b>النوع:</b> ' + (att.follow_type||'حفظ') + '</p><p style="font-size:.85rem"><b>الصفحات:</b> ' + (att.pages_done||0) + '</p><p style="font-size:.85rem"><b>التقييم:</b> ' + (att.rating||'-') + '</p><p style="font-size:.85rem"><b>المرة القادمة:</b> ' + (att.required||'-') + '</p>';
       if (att.revision && att.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + att.revision.join('، ') + '</p>';
       if (att.achieveJuz && att.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء:</b> ' + att.achieveJuz.join('، ') + '</p>';
       if (att.achievePages && att.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + att.achieveFrom + '→ص' + att.achieveTo + '</p>';
@@ -1280,14 +1225,10 @@ function printRepById(id) {
     var sid = entry[0]; var att = entry[1];
     var s = db.students.find(function(x) { return x.id == sid; });
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
-    var rev = att.revision && att.revision.length ? att.revision.join('، ') : '-';
-    var juz = att.achieveJuz && att.achieveJuz.length ? att.achieveJuz.join('، ') : '';
-    var pg  = att.achievePages && att.achievePages.length ? ('ص' + att.achieveFrom + '→ص' + att.achieveTo) : '';
-    var ach = [juz, pg].filter(Boolean).join(' | ') || '-';
-    rows += '<tr><td style="font-weight:bold">' + (s ? s.name : 'محذوف') + '</td><td>' + sl + '</td><td>' + (att.status==='present'?(att.today||'-'):'-') + '</td><td>' + (att.status==='present'?(att.rating||'-'):'-') + '</td><td>' + (att.status==='present'?(att.required||'-'):'-') + '</td><td style="font-size:10px">' + (att.status==='present'?rev:'-') + '</td><td style="font-size:10px">' + (att.status==='present'?ach:'-') + '</td></tr>';
+    rows += '<tr><td style="font-weight:bold">' + (s ? s.name : 'محذوف') + '</td><td>' + sl + '</td><td>' + (att.status==='present'?(att.follow_type||'حفظ'):'-') + '</td><td>' + (att.status==='present'?(att.today||'-'):'-') + '</td><td style="text-align:center">' + (att.status==='present'?(att.pages_done||0):'-') + '</td><td>' + (att.status==='present'?(att.rating||'-'):'-') + '</td><td>' + (att.status==='present'?(att.required||'-'):'-') + '</td></tr>';
   });
   doPrint('<div class="ph"><h1>دار القرآن الكريم — ' + report.mosque + '</h1><p><b>كشف حضور وتسميع:</b> ' + report.group_name + '</p><p>التاريخ: ' + report.report_date + ' | المعلم: ' + report.teacher_name + '</p></div>'
-    + '<table><thead><tr><th style="width:18%">اسم الطالب</th><th style="width:8%">الحالة</th><th style="width:16%">ماذا سمع</th><th style="width:9%">التقييم</th><th style="width:16%">التسميع المطلوب</th><th style="width:17%">المراجعة</th><th style="width:16%">إنجاز الحفظ</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<table><thead><tr><th style="width:18%">اسم الطالب</th><th style="width:9%">الحالة</th><th style="width:10%">النوع</th><th style="width:20%">ما تم اليوم</th><th style="width:9%">صفحات</th><th style="width:10%">التقييم</th><th style="width:24%">المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
     + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>توقيع المشرف العام: ...............................</span></div>',
     'كشف ' + report.group_name);
 }
@@ -1466,25 +1407,37 @@ function openQiraahSheet() {
   var cont = document.getElementById('qiraahSheetRows');
   cont.innerHTML = '';
   var students = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === db.user.group; });
-
-  if (!students.length) {
-    cont.innerHTML = '<p style="text-align:center;color:var(--gray);padding:20px">لا يوجد طلاب في هذه المجموعة</p>';
-  }
-
   students.forEach(function(s) {
-    window.qiraahData[s.id] = {reading:'', rating:'ممتاز', next:''};
+    window.qiraahData[s.id] = {status:'present', reading:'', rating:'ممتاز', next:''};
     var row = document.createElement('div');
     row.className = 'att-row';
-    row.innerHTML = '<b style="color:#ea580c">' + s.name + '</b>'
+    row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<b style="color:#ea580c">' + s.name + '</b>'
+      + '<select class="att-sel" style="max-width:160px;margin:0" onchange="window.qiraahData[' + s.id + '].status=this.value;toggleQiraahAbsent(' + s.id + ',this.value)">'
+      + '<option value="present">حاضر</option><option value="absent">غائب</option><option value="absent_excused">غائب بعذر</option></select></div>'
+      + '<div id="qiraahFields_' + s.id + '">'
       + '<label>القراءة:</label><input type="text" placeholder="مثال: سورة البقرة 1-5" oninput="window.qiraahData[' + s.id + '].reading=this.value">'
       + '<label>التقييم:</label><select onchange="window.qiraahData[' + s.id + '].rating=this.value">'
       + RATINGS.map(function(r) { return '<option value="' + r + '">' + r + '</option>'; }).join('')
       + '</select>'
-      + '<label>القراءة في المرة القادمة:</label><input type="text" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id + '].next=this.value">';
+      + '<label>القراءة في المرة القادمة:</label><input type="text" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id + '].next=this.value">'
+      + '</div>';
     cont.appendChild(row);
   });
-
   document.getElementById('qiraahSheetModal').classList.remove('hidden');
+}
+function toggleQiraahAbsent(sid, status) {
+  var box = document.getElementById('qiraahFields_' + sid);
+  if (!box) return;
+  if (status === 'absent' || status === 'absent_excused') {
+    box.style.display = 'none';
+    window.qiraahData[sid].reading = '';
+    window.qiraahData[sid].rating = '';
+    window.qiraahData[sid].next = '';
+  } else {
+    box.style.display = '';
+    window.qiraahData[sid].rating = window.qiraahData[sid].rating || 'ممتاز';
+  }
 }
 function closeQiraahSheet() { if (confirmExit()) document.getElementById('qiraahSheetModal').classList.add('hidden'); }
 
@@ -1687,24 +1640,15 @@ function closeAdabModal() { if (confirmExit()) document.getElementById('adabModa
 function openAdabSheet() {
   window.adabData = {};
   var students = db.students.filter(function(s) { return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group); });
-  var latestRep = db.reports.filter(function(r) { return r.mosque===db.mosque && (db.user.role==='admin'||r.group_name===db.user.group); }).sort(function(a,b){return b.id-a.id;})[0];
   var cont = document.getElementById('adabSheetRows'); cont.innerHTML = '';
   students.forEach(function(s) {
-    var isAbsent = latestRep && latestRep.students_data && latestRep.students_data[s.id] && (latestRep.students_data[s.id].status==='absent'||latestRep.students_data[s.id].status==='absent_excused');
-    var initRating = isAbsent ? 'غائب' : 'ممتاز';
-    window.adabData[s.id] = {rating: initRating};
+    window.adabData[s.id] = {rating:'ممتاز'};
     var row = document.createElement('div'); row.className = 'adab-row';
-    if (isAbsent) {
-      row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div>'
-        +'<div style="background:#f1f5f9;color:#475569;padding:8px 16px;border-radius:8px;font-weight:bold">غائب</div>';
-    } else {
-      var btns = ADAB_OPTS.map(function(opt, i) {
-        var cls = 'adab-opt' + (i===0?' a-ex':'');
-        return '<button type="button" class="'+cls+'" id="adOpt_'+s.id+'_'+i+'" onclick="selectAdab('+s.id+','+i+')">'+opt+'</button>';
-      }).join('');
-      row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div>'
-        +'<div class="adab-btns">'+btns+'</div>';
-    }
+    var btns = ADAB_OPTS.map(function(opt, i) {
+      var cls = 'adab-opt' + (i===0?' a-ex':'');
+      return '<button type="button" class="'+cls+'" id="adOpt_'+s.id+'_'+i+'" onclick="selectAdab('+s.id+','+i+')">'+opt+'</button>';
+    }).join('');
+    row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div><div class="adab-btns">'+btns+'</div>';
     cont.appendChild(row);
   });
   document.getElementById('adabSheetModal').classList.remove('hidden');
@@ -1789,87 +1733,57 @@ function renderChartList(students) {
   });
 }
 function openStdChart(sid, type) {
-  curChartSid=sid; curChartType=type;
-  var s=db.students.find(function(x){return x.id==sid;});
-  document.getElementById('stdChartTitle').innerText='📈 '+(s?s.name:'')+' — '+(type==='adab'?'الآداب والأخلاق':'إنجاز الحفظ');
-  var cont=document.getElementById('stdChartContent');cont.innerHTML='';
+  curChartSid = sid;
+  curChartType = type;
+  var s = db.students.find(function(x){return x.id==sid;});
+  document.getElementById('stdChartTitle').innerText = '📈 ' + (s?s.name:'') + ' — ' + (type==='adab'?'الآداب والأخلاق':'إنجاز الحفظ');
+  var cont = document.getElementById('stdChartContent');
+  cont.innerHTML = '';
 
-  if(type==='adab'){
+  if (type === 'adab') {
     var counts={'ممتاز':0,'جيد جداً':0,'جيد':0,'سيء':0,'غائب':0};
     var adabReps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid];}).sort(function(a,b){return a.id-b.id;});
     adabReps.forEach(function(r){var d=r.students_data[sid];if(d&&counts[d.rating]!==undefined)counts[d.rating]++;});
     var total=adabReps.length;
-    var colors={'ممتاز':'#22c55e','جيد جداً':'#3b82f6','جيد':'#f59e0b','سيء':'#ef4444','غائب':'#94a3b8'};
     var html='<div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center"><div style="font-size:1.4rem;font-weight:bold;color:var(--primary)">'+total+'</div><div style="color:var(--gray);font-size:.82rem">إجمالي تقييمات الأدب</div></div>';
-    if(total>0){
-      // رسم بياني خطي
-      html+='<div style="background:white;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px"><canvas id="chartA_'+sid+'" height="200"></canvas></div>';
-      // أشرطة
-      Object.entries(counts).forEach(function(e){var opt=e[0];var cnt=e[1];if(!cnt)return;var pct=Math.round((cnt/total)*100);html+='<div class="bar-row"><div class="bar-lbl" style="color:'+colors[opt]+'">'+opt+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+colors[opt]+'"></div></div><div class="bar-val">'+cnt+' ('+pct+'%)</div></div>';});
-    }else{html+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد تقييمات مسجلة</p>';}
+    Object.keys(counts).forEach(function(k){
+      var pct=total?Math.round((counts[k]/total)*100):0;
+      html+='<div class="bar-row"><div class="bar-lbl">'+k+'</div><div class="bar-bg"><div class="bar-fill" style="background:'+(ADAB_COLORS[k]||'#ddd')+';width:'+pct+'%"></div></div><div class="bar-val">'+counts[k]+'</div></div>';
+    });
     cont.innerHTML=html;
-    if(total>0){
-      setTimeout(function(){
-        var canvas=document.getElementById('chartA_'+sid);if(!canvas)return;
-        var ctx=canvas.getContext('2d');
-        var SCORE={'ممتاز':4,'جيد جداً':3,'جيد':2,'سيء':1,'غائب':0};
-        var SLBL={4:'ممتاز',3:'جيد جداً',2:'جيد',1:'سيء',0:'غائب'};
-        var labels=adabReps.map(function(r){return r.report_date;});
-        var vals=adabReps.map(function(r){var d=r.students_data[sid];return d?((SCORE[d.rating]!==undefined)?SCORE[d.rating]:0):0;});
-        new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'تقييم الأدب',data:vals,borderColor:'#064e3b',backgroundColor:'rgba(6,78,59,.1)',borderWidth:2.5,pointBackgroundColor:'#064e3b',pointRadius:5,tension:.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return 'التقييم: '+(SLBL[c.raw]||c.raw);}}}},scales:{y:{min:0,max:4,ticks:{callback:function(v){return SLBL[v]||'';}},grid:{color:'rgba(0,0,0,.06)'}},x:{grid:{color:'rgba(0,0,0,.06)'}}}}});
-      },200);
+  } else {
+    var trend = getHifzTrendData(sid);
+    var totalPages = getTotalPages(sid);
+    var html2='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:12px;text-align:center">'
+      +'<div style="font-size:2rem;font-weight:bold;color:#4d7c0f">'+totalPages+'</div>'
+      +'<div style="color:var(--gray);font-size:.85rem">إجمالي الصفحات المنجزة</div></div>';
+    if (!trend.length) html2+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز بعد</p>';
+    else {
+      html2+='<canvas id="hifzChartCanvas" height="180"></canvas>';
+      html2+='<div style="margin-top:15px;overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>';
+      trend.forEach(function(x){ html2+='<tr><td>'+x.date+'</td><td>'+(x.data.today||'-')+'</td><td style="text-align:center">'+x.pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+x.total+'</td></tr>'; });
+      html2+='</tbody></table></div>';
     }
-  }else{
-    var trendData=getHifzTrendData(sid);
-    var achieveReps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&((r.students_data[sid].achievePages&&r.students_data[sid].achievePages.length>0)||(r.students_data[sid].achieveJuz&&r.students_data[sid].achieveJuz.length>0));}).sort(function(a,b){return a.id-b.id;});
-    var allPgs=new Set();achieveReps.forEach(function(r){(r.students_data[sid].achievePages||[]).forEach(function(p){allPgs.add(p);});});
-    var totalPgs=allPgs.size;var pct=Math.round((totalPgs/604)*100);var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
-    var html2='<div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center">'
-      +'<div style="font-size:1.8rem;font-weight:bold;color:var(--primary)">'+totalPgs+' / 604</div>'
-      +'<div style="background:#e2e8f0;border-radius:10px;height:12px;overflow:hidden;max-width:280px;margin:8px auto 4px"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
-      +'<div style="font-size:.85rem;font-weight:bold;color:'+bc+'">'+pct+'% من القرآن الكريم</div></div>';
-    if(trendData.length>0){
-      html2+='<div class="notice warn">الرسم التالي يصعد مع التحسن وينزل عند التراجع حسب تقييم إنجاز الحفظ.</div><div style="background:white;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px"><canvas id="chartH_'+sid+'" height="200"></canvas></div>';
-    }
-    if(achieveReps.length>0){
-      html2+='<div style="max-height:180px;overflow-y:auto">';
-      achieveReps.forEach(function(r){var d=r.students_data[sid];var jstr=d.achieveJuz&&d.achieveJuz.length?d.achieveJuz.join('، '):'';var pgstr=d.achievePages&&d.achievePages.length?('ص'+d.achieveFrom+'→ص'+d.achieveTo):'';html2+='<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid var(--bdr);font-size:.82rem"><span>'+r.report_date+'</span><span style="color:#4d7c0f;font-weight:bold">'+(jstr?('أجزاء: '+jstr):'')+' '+(pgstr||'')+'</span></div>';});
-      html2+='</div>';
-    }else{html2+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز حفظ</p>';}
     cont.innerHTML=html2;
-    if(achieveReps.length>0){
+    if (trend.length && window.Chart) {
       setTimeout(function(){
-        var canvas=document.getElementById('chartH_'+sid);if(!canvas)return;
-        var ctx=canvas.getContext('2d');
-        var cum=new Set();
-        var labels=(trendData.length?trendData.map(function(x){return x.date;}):achieveReps.map(function(r){return r.report_date;}));
-        var vals=(trendData.length?trendData.map(function(x){return x.score;}):achieveReps.map(function(r){(r.students_data[sid].achievePages||[]).forEach(function(p){cum.add(p);});return cum.size;}));
-        new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'مؤشر إنجاز الحفظ',data:vals,borderColor:'#4d7c0f',backgroundColor:'rgba(77,124,15,.1)',borderWidth:2.5,pointBackgroundColor:'#4d7c0f',pointRadius:5,tension:.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:604,grid:{color:'rgba(0,0,0,.06)'}},x:{grid:{color:'rgba(0,0,0,.06)'}}}}});
-      },200);
+        var ctx=document.getElementById('hifzChartCanvas'); if(!ctx)return;
+        new Chart(ctx,{type:'line',data:{labels:trend.map(function(x){return x.date;}),datasets:[{label:'مجموع الصفحات',data:trend.map(function(x){return x.total;}),tension:.25,fill:false}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true}}}});
+      },50);
     }
   }
   document.getElementById('stdChartModal').classList.remove('hidden');
 }
-function closeStdChart() { if (confirmExit()) document.getElementById('stdChartModal').classList.add('hidden'); }
+function closeStdChart(){document.getElementById('stdChartModal').classList.add('hidden');}
 function printStdChart(){
-  var s=db.students.find(function(x){return x.id==curChartSid;}); var type=curChartType; var sid=curChartSid;
-  var body='';
-  if(type==='adab'){
-    var counts={'ممتاز':0,'جيد جداً':0,'جيد':0,'سيء':0,'غائب':0};
-    var rps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid];});
-    rps.forEach(function(r){var d=r.students_data[sid];if(d&&counts[d.rating]!==undefined)counts[d.rating]++;});
-    var total=rps.length;
-    var clrs={'ممتاز':'#22c55e','جيد جداً':'#3b82f6','جيد':'#f59e0b','سيء':'#ef4444','غائب':'#94a3b8'};
-    var rows='';Object.entries(counts).forEach(function(e){var opt=e[0];var cnt=e[1];var pct=total>0?Math.round((cnt/total)*100):0;rows+='<tr><td>'+opt+'</td><td style="text-align:center">'+cnt+'</td><td style="text-align:center">'+pct+'%</td><td><div class="bb"><div class="bf" style="width:'+pct+'%;background:'+clrs[opt]+'"></div></div></td></tr>';});
-    body='<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>📊 إحصائية الآداب والأخلاق</b></p><p>الطالب: '+(s?s.name:'')+' | إجمالي التقييمات: '+total+'</p></div><table><thead><tr><th>التقييم</th><th style="text-align:center">العدد</th><th style="text-align:center">النسبة</th><th>الرسم البياني</th></tr></thead><tbody>'+rows+'</tbody></table><div class="pf"><span>تاريخ الطباعة: '+new Date().toLocaleDateString('ar-EG')+'</span></div>';
-  }else{
-    var arps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&((r.students_data[sid].achievePages&&r.students_data[sid].achievePages.length>0)||(r.students_data[sid].achieveJuz&&r.students_data[sid].achieveJuz.length>0));}).sort(function(a,b){return a.id-b.id;});
-    var apgs=new Set();arps.forEach(function(r){(r.students_data[sid].achievePages||[]).forEach(function(p){apgs.add(p);});});
-    var tp=apgs.size;var pp=Math.round((tp/604)*100);
-    var rows2='';arps.forEach(function(r){var d=r.students_data[sid];rows2+='<tr><td>'+r.report_date+'</td><td style="text-align:center">'+(d.achieveJuz&&d.achieveJuz.length?d.achieveJuz.join('، '):'-')+'</td><td style="text-align:center">'+(d.achievePages&&d.achievePages.length?('ص'+d.achieveFrom+'→ص'+d.achieveTo):'-')+'</td></tr>';});
-    body='<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>📖 إحصائية إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | الصفحات المحفوظة: '+tp+'/604 ('+pp+'%)</p></div><table><thead><tr><th>التاريخ</th><th>الأجزاء</th><th>الصفحات</th></tr></thead><tbody>'+rows2+'</tbody></table><div class="pf"><span>تاريخ الطباعة: '+new Date().toLocaleDateString('ar-EG')+'</span></div>';
+  var sid=curChartSid;var s=db.students.find(function(x){return x.id==sid;});
+  if(curChartType==='hifz'){
+    var trend=getHifzTrendData(sid);var rows='';
+    trend.forEach(function(x){rows+='<tr><td>'+x.date+'</td><td>'+(x.data.today||'-')+'</td><td style="text-align:center">'+x.pages+'</td><td style="text-align:center">'+x.total+'</td></tr>';});
+    doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>📈 إحصائية إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | المجموع: '+getTotalPages(sid)+' صفحة</p></div><table><thead><tr><th>التاريخ</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>','إحصائية '+(s?s.name:''));
+  } else {
+    doPrint(document.getElementById('stdChartContent').innerHTML,'إحصائية '+(s?s.name:''));
   }
-  doPrint(body,'إحصائية '+(s?s.name:''));
 }
 function printAllCharts(){
   var now=new Date();var rows='';
@@ -1878,35 +1792,33 @@ function printAllCharts(){
     var adabRps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id];});
     var acnts={'ممتاز':0,'جيد جداً':0,'جيد':0,'سيء':0,'غائب':0};adabRps.forEach(function(r){var d=r.students_data[s.id];if(d&&acnts[d.rating]!==undefined)acnts[d.rating]++;});
     var topA=adabRps.length>0?Object.entries(acnts).sort(function(a,b){return b[1]-a[1];})[0][0]:'-';
-    var pgs=new Set();db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id]&&r.students_data[s.id].achievePages;}).forEach(function(r){(r.students_data[s.id].achievePages||[]).forEach(function(p){pgs.add(p);});});
-    rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;color:#991b1b">'+absOnly+'</td><td style="text-align:center">'+topA+'</td><td style="text-align:center;color:#4d7c0f">'+pgs.size+'/604</td></tr>';
+    var totalPages=getTotalPages(s.id);
+    rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;color:#991b1b">'+absOnly+'</td><td style="text-align:center">'+topA+'</td><td style="text-align:center;color:#4d7c0f;font-weight:bold">'+totalPages+'</td></tr>';
   });
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>📈 ملخص الإحصائيات البيانية</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div>'
-    +'<table><thead><tr><th style="width:4%">#</th><th style="width:22%">اسم الطالب</th><th style="width:18%">المجموعة</th><th style="width:14%">الغياب</th><th style="width:18%">أكثر تقييم أدبي</th><th style="width:24%">صفحات محفوظة</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="pf"><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
+    +'<table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>الغياب</th><th>أكثر تقييم أدبي</th><th>إجمالي الصفحات</th></tr></thead><tbody>'+rows+'</tbody></table>',
     'الإحصائيات البيانية');
 }
 
 // ═══════════════════════════════════════════
-// إنجاز الحفظ
+// إنجاز الحفظ المبسط بالصفحات
 // ═══════════════════════════════════════════
 function openHifzAchieve(){
   allAchieveStudents=db.students.filter(function(s){return s.mosque===db.mosque&&(db.user.role==='admin'||getGroup(s)===db.user.group);});
-  renderAchieveList(allAchieveStudents);document.getElementById('achieveModal').classList.remove('hidden');
+  allAchieveStudents.sort(function(a,b){return getTotalPages(b.id)-getTotalPages(a.id);});
+  renderAchieveList(allAchieveStudents);
+  document.getElementById('achieveModal').classList.remove('hidden');
 }
 function closeAchieveModal() { if (confirmExit()) document.getElementById('achieveModal').classList.add('hidden'); }
 function renderAchieveList(students){
   var cont=document.getElementById('achieveList');cont.innerHTML='';
   if(!students.length){cont.innerHTML='<p style="color:var(--gray);text-align:center;padding:20px">لا يوجد طلاب</p>';return;}
   students.forEach(function(s){
-    var pgs=new Set();db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id]&&r.students_data[s.id].achievePages;}).forEach(function(r){(r.students_data[s.id].achievePages||[]).forEach(function(p){pgs.add(p);});});
-    var juzArr=[];db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id]&&r.students_data[s.id].achieveJuz&&r.students_data[s.id].achieveJuz.length;}).forEach(function(r){(r.students_data[s.id].achieveJuz||[]).forEach(function(j){if(!juzArr.includes(j))juzArr.push(j);});});
-    var tp=pgs.size;var pct=Math.round((tp/604)*100);var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
+    var tp=getTotalPages(s.id);var pct=Math.min(100,Math.round((tp/604)*100));var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
     var row=document.createElement('div');row.style.cssText='background:white;border-radius:12px;border:1px solid var(--bdr);padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px';
     row.innerHTML='<div style="flex:1;min-width:150px"><div style="font-weight:bold;font-size:1rem;color:var(--primary)">'+s.name+'</div><div style="font-size:.82rem;color:var(--gray)">'+getGroup(s)+'</div>'
-      +(juzArr.length?'<div style="font-size:.82rem;color:#7c3aed;margin-top:3px">أجزاء: '+juzArr.join('، ')+'</div>':'')
-      +'<div style="font-size:.82rem;color:#4d7c0f;margin-top:3px">'+tp+' صفحة من 604 ('+pct+'%)</div>'
-      +'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden;max-width:200px"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
+      +'<div style="font-size:.9rem;color:#4d7c0f;margin-top:3px;font-weight:bold">'+tp+' صفحة من 604 ('+pct+'%)</div>'
+      +'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden;max-width:240px"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
       +'</div><button class="btn btn-lime" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openAchieveDetail('+s.id+')">📊 عرض | طباعة</button>';
     cont.appendChild(row);
   });
@@ -1914,49 +1826,29 @@ function renderAchieveList(students){
 function openAchieveDetail(sid){
   curAchieveSid=sid;var s=db.students.find(function(x){return x.id==sid;});
   document.getElementById('achDetailTitle').innerText='🏆 إنجاز حفظ: '+(s?s.name:'');
-  var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&((r.students_data[sid].achievePages&&r.students_data[sid].achievePages.length>0)||(r.students_data[sid].achieveJuz&&r.students_data[sid].achieveJuz.length>0));}).sort(function(a,b){return a.id-b.id;});
-  var pgs=new Set();reps.forEach(function(r){(r.students_data[sid].achievePages||[]).forEach(function(p){pgs.add(p);});});
-  var tp=pgs.size;var pct=Math.round((tp/604)*100);var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
-  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;text-align:center">'
-    +'<div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+tp+' / 604</div>'
-    +'<div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">صفحة محفوظة</div>'
-    +'<div style="background:#e2e8f0;border-radius:10px;height:14px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
-    +'<div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct+'%</div></div>';
-  if(!reps.length){html+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز مسجلة</p>';}
-  else{
-    html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>الأجزاء</th><th>الصفحات</th></tr></thead><tbody>';
-    reps.forEach(function(r){var d=r.students_data[sid];var js=d.achieveJuz&&d.achieveJuz.length?d.achieveJuz.join('، '):'-';var ps=d.achievePages&&d.achievePages.length?('ص'+d.achieveFrom+'→ص'+d.achieveTo+' ('+d.achievePages.length+')'):'-';html+='<tr><td>'+r.report_date+'</td><td style="font-size:.82rem">'+js+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+ps+'</td></tr>';});
-    html+='</tbody></table></div>';
-  }
+  var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&getPagesDoneValue(r.students_data[sid])>0;}).sort(function(a,b){return a.id-b.id;});
+  var total=0;var rows='';
+  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td>'+(d.today||'-')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+total+'</td></tr>';});
+  var pct=Math.min(100,Math.round((total/604)*100));var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
+  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;text-align:center"><div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+total+' / 604</div><div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">صفحة منجزة</div><div style="background:#e2e8f0;border-radius:10px;height:14px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div><div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct+'%</div></div>';
+  if(!reps.length) html+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز مسجلة</p>';
+  else html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   document.getElementById('achDetailContent').innerHTML=html;document.getElementById('achieveDetailModal').classList.remove('hidden');
 }
 function closeAchieveDetail() { if (confirmExit()) document.getElementById('achieveDetailModal').classList.add('hidden'); }
 function printOneAchieve(){
   var sid=curAchieveSid;var s=db.students.find(function(x){return x.id==sid;});
-  var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&((r.students_data[sid].achievePages&&r.students_data[sid].achievePages.length>0)||(r.students_data[sid].achieveJuz&&r.students_data[sid].achieveJuz.length>0));}).sort(function(a,b){return a.id-b.id;});
-  var pgs=new Set();reps.forEach(function(r){(r.students_data[sid].achievePages||[]).forEach(function(p){pgs.add(p);});});
-  var tp=pgs.size;var pct=Math.round((tp/604)*100);var rows='';
-  reps.forEach(function(r){var d=r.students_data[sid];rows+='<tr><td>'+r.report_date+'</td><td style="text-align:center">'+(d.achieveJuz&&d.achieveJuz.length?d.achieveJuz.join('، '):'-')+'</td><td style="text-align:center">'+(d.achievePages&&d.achievePages.length?('ص'+d.achieveFrom+'→ص'+d.achieveTo+' ('+d.achievePages.length+')'):'-')+'</td></tr>';});
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>🏆 إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | '+(s?getGroup(s):'')+' | الصفحات المحفوظة: '+tp+'/604 ('+pct+'%)</p></div>'
-    +'<table><thead><tr><th>التاريخ</th><th>الأجزاء</th><th>الصفحات</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="pf"><span>تاريخ الطباعة: '+new Date().toLocaleDateString('ar-EG')+'</span></div>',
-    'إنجاز حفظ '+(s?s.name:''));
+  var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&getPagesDoneValue(r.students_data[sid])>0;}).sort(function(a,b){return a.id-b.id;});
+  var total=0;var rows='';
+  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td>'+(d.today||'-')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center">'+total+'</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>🏆 إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | '+(s?getGroup(s):'')+' | إجمالي الصفحات: '+total+'</p></div><table><thead><tr><th>التاريخ</th><th>النوع</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>','إنجاز حفظ '+(s?s.name:''));
 }
 function printAllAchieve(){
   var now=new Date();var rows='';
-  allAchieveStudents.forEach(function(s,i){
-    var pgs=new Set();db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id]&&r.students_data[s.id].achievePages;}).forEach(function(r){(r.students_data[s.id].achievePages||[]).forEach(function(p){pgs.add(p);});});
-    var juzArr=[];db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id]&&r.students_data[s.id].achieveJuz&&r.students_data[s.id].achieveJuz.length;}).forEach(function(r){(r.students_data[s.id].achieveJuz||[]).forEach(function(j){if(!juzArr.includes(j))juzArr.push(j);});});
-    var tp=pgs.size;var pct=Math.round((tp/604)*100);var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
-    rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="font-size:10px">'+(juzArr.length?juzArr.join('، '):'-')+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+tp+'</td><td style="text-align:center">'+pct+'%</td><td><div style="background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden"><div style="height:100%;border-radius:4px;background:'+bc+';width:'+pct+'%"></div></div></td></tr>';
-  });
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>🏆 كشف إنجاز الحفظ — جميع الطلاب</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div>'
-    +'<table><thead><tr><th style="width:4%">#</th><th style="width:20%">اسم الطالب</th><th style="width:16%">المجموعة</th><th style="width:20%">الأجزاء</th><th style="width:12%">الصفحات</th><th style="width:8%">النسبة</th><th style="width:20%">الرسم البياني</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="pf"><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
-    'كشف إنجاز الحفظ');
+  allAchieveStudents.forEach(function(s,i){var tp=getTotalPages(s.id);var pct=Math.min(100,Math.round((tp/604)*100));rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+tp+'</td><td style="text-align:center">'+pct+'%</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>🏆 كشف إنجاز الحفظ — جميع الطلاب</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div><table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>إجمالي الصفحات</th><th>النسبة</th></tr></thead><tbody>'+rows+'</tbody></table>','إنجاز الحفظ');
 }
 
-window.addEventListener('beforeunload', function(e){ e.preventDefault(); e.returnValue = ''; });
 initApp();
 </script>
 </body>
