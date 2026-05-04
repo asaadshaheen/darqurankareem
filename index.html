@@ -110,6 +110,12 @@ input,select,textarea{width:100%;padding:12px;border:1px solid var(--bdr);border
   .menu-item{border-radius:16px;padding:18px 12px}
 }
 
+/* إشعار الأذكار */
+#salatReminder{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:white;color:var(--primary);border:2px solid var(--primary);border-bottom:6px solid var(--sec);border-radius:16px;padding:13px 22px;box-shadow:0 8px 25px rgba(0,0,0,.22);z-index:10000;font-weight:bold;max-width:340px;text-align:center;display:none}
+#salatReminder.show{display:block;animation:zekrShake .45s ease-in-out}
+#salatReminder .sr-close{background:transparent;border:none;color:var(--gray);font-size:1.1rem;cursor:pointer;margin-right:10px;float:left}
+@keyframes zekrShake{0%{transform:translateX(-50%) translateY(-10px);opacity:0}20%{transform:translateX(calc(-50% - 6px));opacity:1}40%{transform:translateX(calc(-50% + 6px))}60%{transform:translateX(calc(-50% - 4px))}80%{transform:translateX(calc(-50% + 4px))}100%{transform:translateX(-50%);opacity:1}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -217,6 +223,11 @@ function sbSelect(table, orderCol, orderDesc) {
     <span class="ld-gold">سبحان الله وبحمده</span><br>
     <span class="ld-gold">سبحان الله العظيم</span>
   </div>
+</div>
+
+<div id="salatReminder">
+  <button class="sr-close" onclick="hideSalatReminder()">×</button>
+  <span id="zekrText">صلّيت على النبي ﷺ؟</span>
 </div>
 
 <div id="photoViewer" class="hidden" onclick="closePhotoViewer()">
@@ -639,7 +650,6 @@ const PCSS = [
   ".bb{flex:1;background:#e5e7eb;border-radius:4px;height:14px;overflow:hidden}",
   ".bf{height:100%;border-radius:4px}",
   ".bv{width:50px;font-size:11px;text-align:left}",
-  ".page-break{page-break-after:always;break-after:page}",
   "@page{margin:8mm;size:A4 portrait}"
 ].join('');
 
@@ -1522,19 +1532,17 @@ function buildQiraahPrintHtml(reps, titleText) {
   var html = '';
   reps.forEach(function(r, ri) {
     var entries = Object.entries(r.students_data || {});
-    for (var i = 0; i < entries.length; i += 10) {
-      var chunk = entries.slice(i, i + 10);
-      var rows = '';
-      chunk.forEach(function(e, idx) {
-        var st = db.students.find(function(x){ return x.id == e[0]; });
-        var d = e[1] || {};
-        rows += '<tr><td style="text-align:center">' + (i + idx + 1) + '</td><td style="font-weight:bold">' + (st ? st.name : 'محذوف') + '</td><td>' + (d.reading || '-') + '</td><td style="text-align:center">' + (d.rating || '-') + '</td><td>' + (d.next || '-') + '</td></tr>';
-      });
-      html += '<div class="ph"><h1>دار القرآن الكريم — ' + r.mosque + '</h1><p><b>' + titleText + '</b></p><p>المجموعة: ' + r.group_name + ' | التاريخ: ' + r.report_date + ' | المعلم: ' + (r.teacher_name || '-') + '</p></div>'
-        + '<table><thead><tr><th style="width:5%">#</th><th style="width:25%">اسم الطالب</th><th style="width:25%">القراءة</th><th style="width:15%">التقييم</th><th style="width:30%">القراءة في المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
-        + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>صفحة تحتوي حتى 10 طلاب</span></div>';
-      if (!(ri === reps.length - 1 && i + 10 >= entries.length)) html += '<div class="page-break"></div>';
-    }
+    var rows = '';
+    entries.forEach(function(e, idx) {
+      var st = db.students.find(function(x){ return x.id == e[0]; });
+      var d = e[1] || {};
+      var status = d.status === 'absent' ? 'غائب' : d.status === 'absent_excused' ? 'غائب بعذر' : 'حاضر';
+      rows += '<tr><td style="text-align:center">' + (idx + 1) + '</td><td style="font-weight:bold">' + (st ? st.name : 'محذوف') + '</td><td style="text-align:center">' + status + '</td><td>' + (d.reading || '-') + '</td><td style="text-align:center">' + (d.rating || '-') + '</td><td>' + (d.next || '-') + '</td></tr>';
+    });
+    html += '<div class="ph"><h1>دار القرآن الكريم — ' + r.mosque + '</h1><p><b>' + titleText + '</b></p><p>المجموعة: ' + r.group_name + ' | التاريخ: ' + r.report_date + ' | المعلم: ' + (r.teacher_name || '-') + '</p></div>'
+      + '<table><thead><tr><th style="width:5%">#</th><th style="width:22%">اسم الطالب</th><th style="width:12%">الحالة</th><th style="width:23%">القراءة</th><th style="width:13%">التقييم</th><th style="width:25%">القراءة في المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: ' + (new Date()).toLocaleDateString('ar-EG') + '</span></div>';
+    if (ri < reps.length - 1) html += '<hr style="margin:18px 0;border:0;border-top:2px dashed #ddd">';
   });
   return html || '<p>لا توجد بيانات للطباعة</p>';
 }
@@ -1849,7 +1857,35 @@ function printAllAchieve(){
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>🏆 كشف إنجاز الحفظ — جميع الطلاب</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div><table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>إجمالي الصفحات</th><th>النسبة</th></tr></thead><tbody>'+rows+'</tbody></table>','إنجاز الحفظ');
 }
 
+
+// ═══════════════════════════════════════════
+// إشعار لطيف كل 30 ثانية
+// ═══════════════════════════════════════════
+var salatReminderTimer = null;
+var AZKAR = ['سبحان الله وبحمده','سبحان الله العظيم','الحمد لله','سبحان الله','لا إله إلا الله','الله أكبر','صلّيت على النبي ﷺ ؟'];
+var zekrIndex = 0;
+function showSalatReminder() {
+  var el = document.getElementById('salatReminder');
+  var txt = document.getElementById('zekrText');
+  if (!el) return;
+  if (txt) txt.innerText = AZKAR[zekrIndex];
+  zekrIndex = (zekrIndex + 1) % AZKAR.length;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
+function hideSalatReminder() {
+  var el = document.getElementById('salatReminder');
+  if (el) el.classList.remove('show');
+}
+function startSalatReminder() {
+  if (salatReminderTimer) clearInterval(salatReminderTimer);
+  salatReminderTimer = setInterval(showSalatReminder, 30000);
+}
+
 initApp();
+startSalatReminder();
 </script>
 </body>
 </html>
