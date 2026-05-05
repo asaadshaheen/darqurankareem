@@ -2016,13 +2016,55 @@ function openAchieveDetail(sid){
   document.getElementById('achDetailTitle').innerText='🏆 إنجاز حفظ: '+(s?s.name:'');
   var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&getPagesDoneValue(r.students_data[sid])>0;}).sort(function(a,b){return a.id-b.id;});
   var total=0;var rows='';
-  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+total+'</td><td style="text-align:center"><button class="btn btn-primary" style="min-height:34px;padding:6px 10px;font-size:.78rem" onclick="openHifzPagesSheet('+r.id+','+sid+')">تعديل</button></td></tr>';});
+  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+total+'</td><td style="text-align:center;white-space:nowrap"><button class="btn btn-primary" style="min-height:34px;padding:6px 10px;font-size:.78rem;margin-left:5px" onclick="openHifzPagesSheet('+r.id+','+sid+')">✏️ تعديل</button><button class="btn btn-danger" style="min-height:34px;padding:6px 10px;font-size:.78rem" onclick="deleteHifzPagesRecord('+r.id+','+sid+')">🗑 حذف</button></td></tr>';});
   var pct=Math.min(100,Math.round((total/604)*100));var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
   var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;text-align:center"><div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+total+' / 604</div><div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">صفحة منجزة</div><div style="background:#e2e8f0;border-radius:10px;height:14px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div><div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct+'%</div></div>';
   if(!reps.length) html+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز مسجلة</p>';
-  else html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th><th>تعديل</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  else html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th><th>إجراءات</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   document.getElementById('achDetailContent').innerHTML=html;document.getElementById('achieveDetailModal').classList.remove('hidden');
 }
+
+async function deleteHifzPagesRecord(reportId, studentId) {
+  if (!confirm('هل أنت متأكد من حذف عدد الصفحات لهذا الطالب؟')) return;
+
+  var rep = db.reports.find(function(r){ return r.id == reportId; });
+  if (!rep || !rep.students_data || !rep.students_data[studentId]) {
+    alert('لم يتم العثور على السجل');
+    return;
+  }
+
+  var sd = Object.assign({}, rep.students_data || {});
+  var old = Object.assign({}, sd[studentId] || {});
+
+  old.pages_done = '';
+  old.pagesDone = '';
+
+  // إذا كان هذا السجل مخصصاً لإنجاز الحفظ فقط ولا يحتوي بيانات أخرى، احذف الطالب من الكشف.
+  var hasOtherData = (old.today && String(old.today).trim()) ||
+                     (old.required && String(old.required).trim()) ||
+                     (old.status && old.status !== 'present') ||
+                     (old.follow_type && old.follow_type !== 'حفظ') ||
+                     (old.rating && old.rating !== 'ممتاز');
+
+  if (hasOtherData) sd[studentId] = old;
+  else delete sd[studentId];
+
+  showLoad('جاري حذف عدد الصفحات...');
+  var r = await dbClient.from('reports').update({students_data:sd}).eq('id', reportId);
+  hideLoad();
+
+  if (r.error) {
+    alert('خطأ: ' + r.error.message);
+    return;
+  }
+
+  rep.students_data = sd;
+  alert('تم حذف عدد الصفحات ✅');
+
+  openAchieveDetail(studentId);
+  renderAchieveList(allAchieveStudents);
+}
+
 function closeAchieveDetail() { if (confirmExit()) document.getElementById('achieveDetailModal').classList.add('hidden'); }
 function printOneAchieve(){
   var sid=curAchieveSid;var s=db.students.find(function(x){return x.id==sid;});
