@@ -1027,7 +1027,7 @@ function openAttSheet(forced, rId) {
   document.getElementById('attSearch').value = '';
   var existing = rId ? db.reports.find(function(r) { return r.id == rId; }) : null;
   var exData = existing ? (existing.students_data || {}) : null;
-  var showPagesDone = (curAttGroup === 'مجموعة أهل القرآن' || curAttGroup === 'مجموعة الفتية');
+  var showPagesDone = false; // تم حذف خانة كم صفحة أنجز من الكشف اليومي
   document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (' + curAttGroup + ')';
 
   students.forEach(function(s) {
