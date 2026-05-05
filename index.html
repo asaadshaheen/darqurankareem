@@ -1027,13 +1027,17 @@ function openAttSheet(forced, rId) {
   document.getElementById('attSearch').value = '';
   var existing = rId ? db.reports.find(function(r) { return r.id == rId; }) : null;
   var exData = existing ? (existing.students_data || {}) : null;
+  var showPagesDone = (curAttGroup === 'مجموعة أهل القرآن' || curAttGroup === 'مجموعة الفتية');
   document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (' + curAttGroup + ')';
 
   students.forEach(function(s) {
-    var defVal = {status:'present', today:'', follow_type:'حفظ', pages_done:'', rating:'ممتاز', required:''};
+    var defVal = {status:'present', today:'', pages_done:'', rating:'ممتاز', required:''};
     var val = exData ? Object.assign({}, defVal, (exData[s.id] || {})) : defVal;
-    if (!val.follow_type) val.follow_type = 'حفظ';
     if (val.pages_done === undefined || val.pages_done === null) val.pages_done = '';
+
+    var pagesHTML = showPagesDone
+      ? '<label>كم صفحة أنجز:</label><input type="number" min="0" step="0.5" value="' + (val.pages_done || '') + '" placeholder="مثال: 2" oninput="window.attData[' + s.id + '].pages_done=this.value">'
+      : '';
 
     var attHTML = '<div class="att-row" id="attRow_' + s.id + '">' +
       '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">' +
@@ -1044,25 +1048,20 @@ function openAttSheet(forced, rId) {
       '<option value="absent_excused"' + (val.status === 'absent_excused' ? ' selected' : '') + '>غائب بعذر</option>' +
       '</select></div>' +
       '<div class="hide-absent">' +
-      '<label>نوع المتابعة:</label>' +
-      '<select onchange="window.attData[' + s.id + '].follow_type=this.value">' +
-      ['حفظ','مراجعة','تلاوة'].map(function(t){ return '<option value="' + t + '"' + (val.follow_type === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
-      '</select>' +
-      '<label>ما تم اليوم:</label><input type="text" value="' + (val.today || '') + '" placeholder="مثال: سورة النبأ 1-10" oninput="window.attData[' + s.id + '].today=this.value">' +
-      '<label>عدد الصفحات المنجزة اليوم:</label><input type="number" min="0" step="0.5" value="' + (val.pages_done || '') + '" placeholder="مثال: 2" oninput="window.attData[' + s.id + '].pages_done=this.value">' +
+      '<label>التسميع:</label><input type="text" value="' + (val.today || '') + '" placeholder="مثال: سورة النبأ 1-10" oninput="window.attData[' + s.id + '].today=this.value">' +
       '<label>التقييم:</label>' +
       '<select onchange="window.attData[' + s.id + '].rating=this.value">' +
       RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
       '</select>' +
       '<label>المطلوب للمرة القادمة:</label><input type="text" value="' + (val.required || '') + '" placeholder="مثال: النازعات 1-10" oninput="window.attData[' + s.id + '].required=this.value">' +
+      pagesHTML +
       '</div></div>';
 
     cont.innerHTML += attHTML;
     window.attData[s.id] = {
       status: val.status || 'present',
-      follow_type: val.follow_type || 'حفظ',
       today: val.today || '',
-      pages_done: val.pages_done || '',
+      pages_done: showPagesDone ? (val.pages_done || '') : '',
       rating: val.rating || 'ممتاز',
       required: val.required || ''
     };
@@ -1148,12 +1147,10 @@ function showHistory(id) {
     var sl = h.status === 'present' ? 'حاضر' : h.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
     var extra = '';
     if (h.status === 'present') {
-      extra = '<p style="font-size:.85rem;margin-top:5px"><b>سمع:</b> ' + (h.today||'-') + '</p>'
-        + '<p style="font-size:.85rem"><b>التقييم:</b> ' + h.rating + '</p>'
-        + '<p style="font-size:.85rem"><b>النوع:</b> ' + (h.follow_type||'حفظ') + '</p>'
+      extra = '<p style="font-size:.85rem;margin-top:5px"><b>التسميع:</b> ' + (h.today||'-') + '</p>'
         + '<p style="font-size:.85rem"><b>التقييم:</b> ' + (h.rating||'-') + '</p>'
-        + '<p style="font-size:.85rem"><b>عدد الصفحات:</b> ' + (h.pages_done||0) + '</p>'
-        + '<p style="font-size:.85rem"><b>المرة القادمة:</b> ' + (h.required||'-') + '</p>';
+        + '<p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ' + (h.required||'-') + '</p>'
+        + ((h.pages_done !== undefined && h.pages_done !== null && h.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + h.pages_done + '</p>' : '');
       if (h.revision && h.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + h.revision.join('، ') + '</p>';
       if (h.achieveJuz && h.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء المحفوظة:</b> ' + h.achieveJuz.join('، ') + '</p>';
       if (h.achievePages && h.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + h.achieveFrom + ' → ص' + h.achieveTo + ' (' + h.achievePages.length + ' صفحة)</p>';
@@ -1236,7 +1233,7 @@ function renderRepDetail(entries, r) {
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
     var extra = '';
     if (att.status === 'present') {
-      extra = '<p style="font-size:.85rem"><b>ما تم:</b> ' + (att.today||'-') + '</p><p style="font-size:.85rem"><b>النوع:</b> ' + (att.follow_type||'حفظ') + '</p><p style="font-size:.85rem"><b>الصفحات:</b> ' + (att.pages_done||0) + '</p><p style="font-size:.85rem"><b>التقييم:</b> ' + (att.rating||'-') + '</p><p style="font-size:.85rem"><b>المرة القادمة:</b> ' + (att.required||'-') + '</p>';
+      extra = '<p style="font-size:.85rem"><b>التسميع:</b> ' + (att.today||'-') + '</p><p style="font-size:.85rem"><b>التقييم:</b> ' + (att.rating||'-') + '</p><p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ' + (att.required||'-') + '</p>' + ((att.pages_done !== undefined && att.pages_done !== null && att.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + att.pages_done + '</p>' : '');
       if (att.revision && att.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + att.revision.join('، ') + '</p>';
       if (att.achieveJuz && att.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء:</b> ' + att.achieveJuz.join('، ') + '</p>';
       if (att.achievePages && att.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + att.achieveFrom + '→ص' + att.achieveTo + '</p>';
@@ -1265,10 +1262,10 @@ function printRepById(id) {
     var sid = entry[0]; var att = entry[1];
     var s = db.students.find(function(x) { return x.id == sid; });
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
-    rows += '<tr><td style="font-weight:bold">' + (s ? s.name : 'محذوف') + '</td><td>' + sl + '</td><td>' + (att.status==='present'?(att.follow_type||'حفظ'):'-') + '</td><td>' + (att.status==='present'?(att.today||'-'):'-') + '</td><td style="text-align:center">' + (att.status==='present'?(att.pages_done||0):'-') + '</td><td>' + (att.status==='present'?(att.rating||'-'):'-') + '</td><td>' + (att.status==='present'?(att.required||'-'):'-') + '</td></tr>';
+    rows += '<tr><td style="font-weight:bold">' + (s ? s.name : 'محذوف') + '</td><td>' + sl + '</td><td>' + (att.status==='present'?(att.today||'-'):'-') + '</td><td>' + (att.status==='present'?(att.rating||'-'):'-') + '</td><td>' + (att.status==='present'?(att.required||'-'):'-') + '</td><td style="text-align:center">' + (att.status==='present'?(att.pages_done||'-'):'-') + '</td></tr>';
   });
   doPrint('<div class="ph"><h1>دار القرآن الكريم — ' + report.mosque + '</h1><p><b>كشف حضور وتسميع:</b> ' + report.group_name + '</p><p>التاريخ: ' + report.report_date + ' | المعلم: ' + report.teacher_name + '</p></div>'
-    + '<table><thead><tr><th style="width:18%">اسم الطالب</th><th style="width:9%">الحالة</th><th style="width:10%">النوع</th><th style="width:20%">ما تم اليوم</th><th style="width:9%">صفحات</th><th style="width:10%">التقييم</th><th style="width:24%">المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<table><thead><tr><th style="width:20%">اسم الطالب</th><th style="width:10%">الحالة</th><th style="width:24%">التسميع</th><th style="width:12%">التقييم</th><th style="width:24%">المطلوب للمرة القادمة</th><th style="width:10%">صفحات</th></tr></thead><tbody>' + rows + '</tbody></table>'
     + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>توقيع المشرف العام: ...............................</span></div>',
     'كشف ' + report.group_name);
 }
