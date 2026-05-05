@@ -250,24 +250,16 @@ function sbSelect(table, orderCol, orderDesc) {
   </div>
 </section>
 
-<!-- تسجيل الدخول -->
+<!-- اختيار المشرفين بدون تسجيل دخول -->
 <section id="loginScreen" class="container hidden">
-  <div style="max-width:450px;margin:20px auto;background:white;border-radius:16px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.1)">
-    <h2 style="text-align:center;color:var(--primary)">تسجيل الدخول</h2>
+  <div style="max-width:520px;margin:20px auto;background:white;border-radius:16px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.1)">
+    <h2 style="text-align:center;color:var(--primary)">اختيار المشرف</h2>
     <div id="mosqueLabel" style="text-align:center;font-weight:bold;color:var(--sec);margin:10px 0"></div>
-    <label>اسم المستخدم</label>
-    <input type="text" id="userIn" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="latin" style="font-size:16px">
-    <label>كلمة المرور</label>
-    <div class="pass-wrap">
-      <input type="password" id="passIn" autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="latin" style="font-size:16px">
-      <button type="button" class="pass-toggle" onclick="togglePass()">👁️</button>
-    </div>
-    <button class="btn btn-primary btn-block" style="margin-top:20px" onclick="handleLogin()">دخول المشرفين</button>
-    <hr style="margin:20px 0;border:0;border-top:1px solid #eee">
-    <label>دخول ولي الأمر برقم الهاتف</label>
-    <input type="tel" id="parentPhoneIn" placeholder="أدخل رقم الهاتف المسجل للطالب">
-    <button class="btn btn-gold btn-block" style="margin-top:10px" onclick="loginParent()">دخول ولي الأمر</button>
-    <button class="btn btn-block" style="background:none;color:var(--gray);margin-top:10px" onclick="logoutConfirm()">← عودة</button>
+    <p style="text-align:center;color:var(--gray);margin-bottom:18px">اختر اسم المشرف للدخول مباشرة</p>
+    <button class="btn btn-primary btn-block" style="margin-bottom:12px" onclick="loginSupervisor('yousef')">الشيخ يوسف أبو خضير</button>
+    <button class="btn btn-primary btn-block" style="margin-bottom:12px" onclick="loginSupervisor('khalil')">الشيخ خليل الرفاعي</button>
+    <button class="btn btn-primary btn-block" onclick="loginSupervisor('asaad')">الشيخ أسعد شاهين</button>
+    <button class="btn btn-block" style="background:none;color:var(--gray);margin-top:15px" onclick="backToMosqueSelect()">← رجوع لاختيار المسجد</button>
   </div>
 </section>
 
@@ -502,11 +494,25 @@ function sbSelect(table, orderCol, orderDesc) {
   <div id="stdChartContent"></div>
 </div></div>
 
+<!-- Modal: تسجيل عدد صفحات الحفظ -->
+<div id="hifzPagesModal" class="modal hidden"><div class="mc" style="max-width:780px">
+  <div class="modal-head">
+    <h2 style="color:#4d7c0f">📝 تسجيل عدد صفحات الحفظ</h2>
+    <button class="close-top-btn" onclick="closeHifzPagesModal()">إغلاق ✕</button>
+  </div>
+  <p style="color:var(--gray);font-size:.9rem;margin-bottom:10px">اكتب عدد الصفحات التي حفظها كل طالب اليوم، واترك الخانة فارغة لمن لا يوجد له إنجاز.</p>
+  <div id="hifzPagesRows"></div>
+  <div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee">
+    <button class="btn btn-lime" style="flex:1" onclick="saveHifzPagesSheet()">💾 حفظ عدد الصفحات</button>
+  </div>
+</div></div>
+
 <!-- Modal: إنجاز الحفظ -->
 <div id="achieveModal" class="modal hidden"><div class="mc" style="max-width:700px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
     <h2 style="color:#4d7c0f">🏆 إنجاز الحفظ</h2>
     <div style="display:flex;gap:8px">
+      <button class="btn btn-lime" style="min-height:38px" onclick="openHifzPagesSheet()">📝 تسجيل عدد الصفحات</button>
       <button class="btn btn-gold" style="min-height:38px" onclick="printAllAchieve()">🖨️ طباعة الكل</button>
       <button class="btn btn-danger" style="min-height:38px" onclick="closeAchieveModal()">إغلاق</button>
     </div>
@@ -692,6 +698,7 @@ var activeAdabViewId = null;
 var curChartSid = null, curChartType = null, allChartStudents = [];
 var allAchieveStudents = [], curAchieveSid = null;
 window.adabData = {};
+var curAdabRepId = null;
 
 // ═══════════════════════════════════════════
 // مساعدات
@@ -781,13 +788,26 @@ function setMosque(m) {
   document.getElementById('mosqueScreen').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
 }
+function backToMosqueSelect() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mosqueScreen').classList.remove('hidden');
+}
+function loginSupervisor(username) {
+  var acc = ACCOUNTS.find(function(x){ return x.username === username || x.user === username; });
+  if (!acc) { alert('لم يتم العثور على المشرف'); return; }
+  db.user = acc;
+  showDashboard();
+}
 
 // ═══════════════════════════════════════════
 // تسجيل الدخول — مضمون 100%
 // ═══════════════════════════════════════════
 function handleLogin() {
-  var rawU = document.getElementById('userIn').value || '';
-  var rawP = document.getElementById('passIn').value || '';
+  var uEl = document.getElementById('userIn');
+  var pEl = document.getElementById('passIn');
+  if (!uEl || !pEl) { alert('تم إلغاء شاشة تسجيل الدخول، اختر المشرف من الأزرار.'); return; }
+  var rawU = uEl.value || '';
+  var rawP = pEl.value || '';
   // تنظيف: إزالة كل ما ليس حروف/أرقام إنجليزية من اسم المستخدم
   var u = rawU.normalize('NFC').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   // تنظيف كلمة المرور: إزالة المسافات فقط
@@ -1167,6 +1187,7 @@ function renderArchGrid(reps) {
       + '<p style="font-size:.8rem">بإشراف: ' + r.teacher_name + '</p>'
       + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
       + '<button class="btn btn-primary" style="flex:1" onclick="viewReport(' + r.id + ')">عرض</button>'
+      + '<button class="btn btn-info" style="flex:1" onclick="editAttendanceReport(' + r.id + ')">تعديل</button>'
       + '<button class="btn btn-gold" style="flex:1" onclick="printRepById(' + r.id + ')">طباعة</button>'
       + '<button class="btn btn-danger" style="flex:1" onclick="deleteReport(' + r.id + ')">حذف</button>'
       + '</div>';
@@ -1180,6 +1201,13 @@ async function deleteReport(id) {
   if (r.error) { hideLoad(); alert('خطأ: ' + r.error.message); return; }
   db.reports = db.reports.filter(function(x) { return x.id != id; });
   hideLoad(); closeArchiveModal(); openArchive();
+}
+function editAttendanceReport(id) {
+  var r = db.reports.find(function(x){ return x.id == id; });
+  if (!r) return;
+  document.getElementById('repViewModal').classList.add('hidden');
+  document.getElementById('archiveModal').classList.add('hidden');
+  openAttSheet(r.group_name, r.id);
 }
 function viewReport(id) {
   activeViewRepId = id; var r = db.reports.find(function(x) { return x.id == id; }); if (!r) return;
@@ -1401,6 +1429,7 @@ function printHifzAll() {
 // أحكام التجويد وتصحيح التلاوة - يوسف وخليل
 // ═══════════════════════════════════════════
 window.qiraahData = {};
+var curQiraahRepId = null;
 
 function canQiraahTeacher() {
   return db.user && (db.user.username === 'yousef' || db.user.username === 'khalil' || db.user.user === 'yousef' || db.user.user === 'khalil');
@@ -1412,27 +1441,33 @@ function openQiraah() {
 }
 function closeQiraah() { if (confirmExit()) document.getElementById('qiraahModal').classList.add('hidden'); }
 
-function openQiraahSheet() {
+function openQiraahSheet(editId) {
+  curQiraahRepId = editId || null;
   window.qiraahData = {};
   var cont = document.getElementById('qiraahSheetRows');
   cont.innerHTML = '';
-  var students = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === db.user.group; });
+  var existing = editId ? db.qiraahReports.find(function(r){ return r.id == editId; }) : null;
+  var exData = existing ? (existing.students_data || {}) : {};
+  var groupName = existing ? existing.group_name : db.user.group;
+  var students = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === groupName; });
   students.forEach(function(s) {
-    window.qiraahData[s.id] = {status:'present', reading:'', rating:'ممتاز', next:''};
+    var val = Object.assign({status:'present', reading:'', rating:'ممتاز', next:''}, exData[s.id] || {});
+    window.qiraahData[s.id] = JSON.parse(JSON.stringify(val));
     var row = document.createElement('div');
     row.className = 'att-row';
     row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
       + '<b style="color:#ea580c">' + s.name + '</b>'
       + '<select class="att-sel" style="max-width:160px;margin:0" onchange="window.qiraahData[' + s.id + '].status=this.value;toggleQiraahAbsent(' + s.id + ',this.value)">'
-      + '<option value="present">حاضر</option><option value="absent">غائب</option><option value="absent_excused">غائب بعذر</option></select></div>'
+      + '<option value="present"' + (val.status==='present'?' selected':'') + '>حاضر</option><option value="absent"' + (val.status==='absent'?' selected':'') + '>غائب</option><option value="absent_excused"' + (val.status==='absent_excused'?' selected':'') + '>غائب بعذر</option></select></div>'
       + '<div id="qiraahFields_' + s.id + '">'
-      + '<label>القراءة:</label><input type="text" placeholder="مثال: سورة البقرة 1-5" oninput="window.qiraahData[' + s.id + '].reading=this.value">'
+      + '<label>القراءة:</label><input type="text" value="' + (val.reading || '') + '" placeholder="مثال: سورة البقرة 1-5" oninput="window.qiraahData[' + s.id + '].reading=this.value">'
       + '<label>التقييم:</label><select onchange="window.qiraahData[' + s.id + '].rating=this.value">'
-      + RATINGS.map(function(r) { return '<option value="' + r + '">' + r + '</option>'; }).join('')
+      + RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('')
       + '</select>'
-      + '<label>القراءة في المرة القادمة:</label><input type="text" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id + '].next=this.value">'
+      + '<label>القراءة في المرة القادمة:</label><input type="text" value="' + (val.next || '') + '" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id + '].next=this.value">'
       + '</div>';
     cont.appendChild(row);
+    if (val.status === 'absent' || val.status === 'absent_excused') toggleQiraahAbsent(s.id, val.status);
   });
   document.getElementById('qiraahSheetModal').classList.remove('hidden');
 }
@@ -1462,13 +1497,21 @@ async function saveQiraahSheet() {
     students_data: JSON.parse(JSON.stringify(window.qiraahData))
   };
 
-  showLoad('جاري حفظ الكشف...');
-  var r = await dbClient.from('qiraah_reports').insert([payload]).select();
-  hideLoad();
-  if (r.error) { alert('خطأ: ' + r.error.message); return; }
-
-  db.qiraahReports.unshift(r.data[0]);
-  alert('تم حفظ الكشف ✅');
+  showLoad(curQiraahRepId ? 'جاري تعديل الكشف...' : 'جاري حفظ الكشف...');
+  if (curQiraahRepId) {
+    var r = await dbClient.from('qiraah_reports').update(payload).eq('id', curQiraahRepId);
+    hideLoad();
+    if (r.error) { alert('خطأ: ' + r.error.message); return; }
+    var idx = db.qiraahReports.findIndex(function(x){ return x.id == curQiraahRepId; });
+    if (idx > -1) db.qiraahReports[idx] = Object.assign({}, db.qiraahReports[idx], payload);
+  } else {
+    var r2 = await dbClient.from('qiraah_reports').insert([payload]).select();
+    hideLoad();
+    if (r2.error) { alert('خطأ: ' + r2.error.message); return; }
+    db.qiraahReports.unshift(r2.data[0]);
+  }
+  alert('تم الحفظ ✅');
+  curQiraahRepId = null;
   document.getElementById('qiraahSheetModal').classList.add('hidden');
 }
 
@@ -1497,6 +1540,7 @@ function openQiraahArchive() {
       + '<p style="font-size:.8rem">بإشراف: ' + (r.teacher_name || '-') + '</p>'
       + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
       + '<button class="btn btn-orange" style="flex:1" onclick="viewQiraahRep(' + r.id + ')">عرض</button>'
+      + '<button class="btn btn-info" style="flex:1" onclick="editQiraahRep(' + r.id + ')">تعديل</button>'
       + '<button class="btn btn-gold" style="flex:1" onclick="printQiraahRep(' + r.id + ')">طباعة</button>'
       + '</div>';
     grid.appendChild(card);
@@ -1506,6 +1550,10 @@ function openQiraahArchive() {
 }
 
 function closeQiraahArch() { if (confirmExit()) document.getElementById('qiraahArchModal').classList.add('hidden'); }
+function editQiraahRep(id) {
+  document.getElementById('qiraahArchModal').classList.add('hidden');
+  openQiraahSheet(id);
+}
 
 function viewQiraahRep(id) {
   activeQiraahViewId = id;
@@ -1645,15 +1693,19 @@ function closeTilawahArch() { if (confirmExit()) document.getElementById('tilawa
 // ═══════════════════════════════════════════
 function openAdab() { document.getElementById('adabModal').classList.remove('hidden'); }
 function closeAdabModal() { if (confirmExit()) document.getElementById('adabModal').classList.add('hidden'); }
-function openAdabSheet() {
+function openAdabSheet(editId) {
+  curAdabRepId = editId || null;
   window.adabData = {};
-  var students = db.students.filter(function(s) { return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group); });
+  var existing = editId ? db.adabReports.find(function(r){ return r.id == editId; }) : null;
+  var exData = existing ? (existing.students_data || {}) : {};
+  var students = db.students.filter(function(s) { return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group|| (existing && getGroup(s)===existing.group_name)); });
   var cont = document.getElementById('adabSheetRows'); cont.innerHTML = '';
   students.forEach(function(s) {
-    window.adabData[s.id] = {rating:'ممتاز'};
+    var old = exData[s.id] || {};
+    window.adabData[s.id] = {rating: old.rating || 'ممتاز'};
     var row = document.createElement('div'); row.className = 'adab-row';
     var btns = ADAB_OPTS.map(function(opt, i) {
-      var cls = 'adab-opt' + (i===0?' a-ex':'');
+      var cls = 'adab-opt' + (window.adabData[s.id].rating===opt ? ' ' + ADAB_CLS[i] : '');
       return '<button type="button" class="'+cls+'" id="adOpt_'+s.id+'_'+i+'" onclick="selectAdab('+s.id+','+i+')">'+opt+'</button>';
     }).join('');
     row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div><div class="adab-btns">'+btns+'</div>';
@@ -1668,11 +1720,20 @@ function selectAdab(sid, idx) {
 async function saveAdabSheet() {
   var now=new Date();
   var payload={mosque:db.mosque,group_name:db.user.role==='admin'?'كل المجموعات':db.user.group,teacher_name:db.user.role==='admin'?'المدير العام':db.user.name,report_date:now.toLocaleDateString('ar-EG'),report_time:now.toLocaleTimeString('ar-EG'),students_data:JSON.parse(JSON.stringify(window.adabData))};
-  showLoad('جاري حفظ كشف الآداب...');
-  var r=await dbClient.from('adab_reports').insert([payload]).select();
-  hideLoad();
-  if(r.error){alert('خطأ: '+r.error.message);return;}
-  db.adabReports.unshift(r.data[0]); alert('تم حفظ كشف الآداب ✅'); document.getElementById('adabSheetModal').classList.add('hidden');
+  showLoad(curAdabRepId ? 'جاري تعديل كشف الآداب...' : 'جاري حفظ كشف الآداب...');
+  if(curAdabRepId){
+    var r=await dbClient.from('adab_reports').update(payload).eq('id',curAdabRepId);
+    hideLoad();
+    if(r.error){alert('خطأ: '+r.error.message);return;}
+    var idx=db.adabReports.findIndex(function(x){return x.id==curAdabRepId;});
+    if(idx>-1) db.adabReports[idx]=Object.assign({},db.adabReports[idx],payload);
+  } else {
+    var r2=await dbClient.from('adab_reports').insert([payload]).select();
+    hideLoad();
+    if(r2.error){alert('خطأ: '+r2.error.message);return;}
+    db.adabReports.unshift(r2.data[0]);
+  }
+  curAdabRepId=null; alert('تم الحفظ ✅'); document.getElementById('adabSheetModal').classList.add('hidden');
 }
 function closeAdabSheet() { if (confirmExit()) document.getElementById('adabSheetModal').classList.add('hidden'); }
 function printAdabCurrent() {
@@ -1689,10 +1750,14 @@ function openAdabArchive() {
   var grid=document.getElementById('adabArchGrid'); grid.innerHTML='';
   var reps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&(db.user.role==='admin'||r.group_name===db.user.group||r.group_name==='كل المجموعات');});
   if(!reps.length){grid.innerHTML='<p style="color:var(--gray);padding:20px;text-align:center">لا توجد سجلات بعد</p>';}
-  else reps.forEach(function(r){var card=document.createElement('div');card.className='rep-card';card.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:#e11d48">'+r.group_name+'</b><small>'+r.report_date+'</small></div><p style="font-size:.8rem">بإشراف: '+r.teacher_name+'</p><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-rose" style="flex:1" onclick="viewAdabRep('+r.id+')">عرض</button><button class="btn btn-danger" style="flex:1" onclick="deleteAdab('+r.id+')">حذف</button></div>';grid.appendChild(card);});
+  else reps.forEach(function(r){var card=document.createElement('div');card.className='rep-card';card.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:#e11d48">'+r.group_name+'</b><small>'+r.report_date+'</small></div><p style="font-size:.8rem">بإشراف: '+r.teacher_name+'</p><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-rose" style="flex:1" onclick="viewAdabRep('+r.id+')">عرض</button><button class="btn btn-info" style="flex:1" onclick="editAdabRep('+r.id+')">تعديل</button><button class="btn btn-danger" style="flex:1" onclick="deleteAdab('+r.id+')">حذف</button></div>';grid.appendChild(card);});
   document.getElementById('adabArchModal').classList.remove('hidden');
 }
 function closeAdabArch() { if (confirmExit()) document.getElementById('adabArchModal').classList.add('hidden'); }
+function editAdabRep(id){
+  document.getElementById('adabArchModal').classList.add('hidden');
+  openAdabSheet(id);
+}
 function viewAdabRep(id) {
   activeAdabViewId=id; var r=db.adabReports.find(function(x){return x.id==id;});if(!r)return;
   document.getElementById('adabViewTitle').innerText='كشف الآداب — '+r.group_name+' ('+r.report_date+')';
@@ -1811,6 +1876,48 @@ function printAllCharts(){
 // ═══════════════════════════════════════════
 // إنجاز الحفظ المبسط بالصفحات
 // ═══════════════════════════════════════════
+
+function openHifzPagesSheet() {
+  var cont = document.getElementById('hifzPagesRows');
+  cont.innerHTML = '';
+  var students = db.students.filter(function(s){ return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group); });
+  if(!students.length){ cont.innerHTML='<p style="text-align:center;color:var(--gray);padding:20px">لا يوجد طلاب</p>'; }
+  students.forEach(function(s){
+    var row=document.createElement('div');
+    row.className='att-row';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<div><b style="color:#4d7c0f">'+s.name+'</b><div style="font-size:.8rem;color:var(--gray)">'+getGroup(s)+'</div></div>'
+      + '<input type="number" min="0" step="0.5" id="hifzPage_'+s.id+'" placeholder="عدد الصفحات" style="max-width:170px;margin:0">'
+      + '</div>'
+      + '<label>ملاحظة / ما تم حفظه:</label><input type="text" id="hifzNote_'+s.id+'" placeholder="مثال: سورة النبأ 1-10">';
+    cont.appendChild(row);
+  });
+  document.getElementById('hifzPagesModal').classList.remove('hidden');
+}
+function closeHifzPagesModal(){ if(confirmExit()) document.getElementById('hifzPagesModal').classList.add('hidden'); }
+async function saveHifzPagesSheet(){
+  var now=new Date();
+  var students=db.students.filter(function(s){ return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group); });
+  var data={};
+  students.forEach(function(s){
+    var pEl=document.getElementById('hifzPage_'+s.id);
+    var nEl=document.getElementById('hifzNote_'+s.id);
+    var pages=pEl ? parseFloat(pEl.value||0) : 0;
+    if(pages>0){ data[s.id]={status:'present',follow_type:'حفظ',today:(nEl?nEl.value:''),pages_done:String(pages),rating:'ممتاز',required:''}; }
+  });
+  if(!Object.keys(data).length){ alert('أدخل عدد صفحات لطالب واحد على الأقل'); return; }
+  var gname=db.user.role==='admin'?'إنجاز الحفظ':db.user.group;
+  var payload={mosque:db.mosque,group_name:gname,teacher_name:db.user.role==='admin'?'المدير العام':db.user.name,report_date:now.toLocaleDateString('ar-EG'),report_time:now.toLocaleTimeString('ar-EG'),students_data:data};
+  showLoad('جاري حفظ عدد الصفحات...');
+  var r=await dbClient.from('reports').insert([payload]).select();
+  hideLoad();
+  if(r.error){ alert('خطأ: '+r.error.message); return; }
+  db.reports.push(r.data[0]);
+  alert('تم حفظ عدد الصفحات ✅');
+  document.getElementById('hifzPagesModal').classList.add('hidden');
+  openHifzAchieve();
+}
+
 function openHifzAchieve(){
   allAchieveStudents=db.students.filter(function(s){return s.mosque===db.mosque&&(db.user.role==='admin'||getGroup(s)===db.user.group);});
   allAchieveStudents.sort(function(a,b){return getTotalPages(b.id)-getTotalPages(a.id);});
