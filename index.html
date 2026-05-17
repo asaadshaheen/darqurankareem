@@ -816,7 +816,9 @@ function selectTerm(term) {
 }
 
 function getMosqueKey(m) {
-  return db.term === 'summer' ? ('الفصل الصيفي - ' + m) : m;
+  // مهم: يجب أن يطابق هذا الاسم قيمة students.mosque في Supabase
+  // مثال: مسجد الحاجة مريم - الفصل الصيفي
+  return db.term === 'summer' ? (m + ' - الفصل الصيفي') : m;
 }
 
 function getMosqueDisplayName() {
