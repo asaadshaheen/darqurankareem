@@ -240,19 +240,32 @@ function sbSelect(table, orderCol, orderDesc) {
 
 <div class="live-header"><div id="liveDate"></div><div id="liveTime"></div></div>
 
-<!-- اختيار المسجد / الفصل -->
-<section id="mosqueScreen" class="container hidden">
+<!-- الشاشة الرئيسية: اختيار الفصل -->
+<section id="termScreen" class="container hidden">
   <div style="text-align:center;margin-top:40px">
     <h1 style="color:var(--primary);font-size:1.8rem">نظام إدارة حلقات دار القرآن الكريم</h1>
-    <p style="color:var(--gray);margin-top:10px">يرجى اختيار المسار للمتابعة</p>
+    <p style="color:var(--gray);margin-top:10px">اختر الفصل للمتابعة</p>
   </div>
   <div style="max-width:500px;margin:30px auto 0">
-    <button class="btn btn-gold btn-block" style="margin-bottom:15px;font-size:1.05rem;border:2px solid #facc15;box-shadow:0 6px 18px rgba(180,83,9,.22)" onclick="setSummerTerm()">
+    <button class="btn btn-gold btn-block" style="margin-bottom:15px;font-size:1.08rem;border:2px solid #facc15;box-shadow:0 6px 18px rgba(180,83,9,.22)" onclick="selectTerm('summer')">
       ☀️ الفصل الصيفي
     </button>
-    <div style="text-align:center;color:var(--gray);font-size:.85rem;margin:12px 0">أو اختر أحد المساجد القديمة</div>
+    <button class="btn btn-primary btn-block" onclick="selectTerm('regular')">
+      📘 الحلقات الحالية
+    </button>
+  </div>
+</section>
+
+<!-- اختيار المسجد بعد اختيار الفصل -->
+<section id="mosqueScreen" class="container hidden">
+  <div style="text-align:center;margin-top:40px">
+    <h1 id="mosqueScreenTitle" style="color:var(--primary);font-size:1.8rem">اختيار المسجد</h1>
+    <p id="mosqueScreenSub" style="color:var(--gray);margin-top:10px">يرجى اختيار المسجد للمتابعة</p>
+  </div>
+  <div style="max-width:500px;margin:30px auto 0">
     <button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد طارق بن زياد الكبير')">مسجد طارق بن زياد الكبير</button>
-    <button class="btn btn-primary btn-block" onclick="setMosque('مسجد الحاجة مريم')">مسجد الحاجة مريم</button>
+    <button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد الحاجة مريم')">مسجد الحاجة مريم</button>
+    <button class="btn btn-block" style="background:none;color:var(--gray);margin-top:10px" onclick="backToTermSelect()">← رجوع لاختيار الفصل</button>
   </div>
 </section>
 
@@ -693,7 +706,7 @@ var ACCOUNTS = [
   {username:'asaad',    name:'الشيخ أسعد شاهين',                   user:'asaad',    pass:'asaad078028',  role:'teacher', group:'مجموعة الأشبال'}
 ];
 
-var db = {mosque:'', user:null, students:[], reports:[], hifzData:{}, adabReports:[], tajweedReports:[], tilawahReports:[], qiraahReports:[], tempImg:'', tempFile:null};
+var db = {term:'regular', termLabel:'الحلقات الحالية', displayMosque:'', mosque:'', user:null, students:[], reports:[], hifzData:{}, adabReports:[], tajweedReports:[], tilawahReports:[], qiraahReports:[], tempImg:'', tempFile:null};
 var currentFilterGroup = null;
 var activeViewRepId = null;
 var curHifzJuz = 'عم', curHifzSid = null, allHifzStudents = [];
@@ -742,7 +755,7 @@ function showLoad(m) { document.getElementById('loadingText').innerText = m || '
 function hideLoad() { document.getElementById('loadingOverlay').style.display = 'none'; }
 function confirmExit(msg) { return confirm(msg || 'هل أنت متأكد من الخروج؟ قد تفقد أي بيانات غير محفوظة.'); }
 function logoutConfirm() { if (confirmExit('هل أنت متأكد من تسجيل الخروج؟')) location.reload(); }
-function hideTeacher(g) { return db.mosque === 'مسجد طارق بن زياد الكبير' && HIDE_GROUPS.includes(g); }
+function hideTeacher(g) { return db.displayMosque === 'مسجد طارق بن زياد الكبير' && HIDE_GROUPS.includes(g); }
 function togglePass() { var i = document.getElementById('passIn'); i.type = (i.type === 'password') ? 'text' : 'password'; }
 function absLv(n) { return n >= 8 ? 'ab-high' : n >= 5 ? 'ab-mid' : 'ab-low'; }
 function absLbl(n) { return n >= 8 ? 'غياب متكرر' : n >= 5 ? 'يحتاج متابعة' : 'منتظم'; }
@@ -785,21 +798,42 @@ async function initApp() {
     console.error('initApp error:', e);
   }
   hideLoad();
+  document.getElementById('termScreen').classList.remove('hidden');
+}
+
+function selectTerm(term) {
+  db.term = term || 'regular';
+  db.termLabel = db.term === 'summer' ? 'الفصل الصيفي' : 'الحلقات الحالية';
+  db.mosque = '';
+  db.displayMosque = '';
+
+  document.getElementById('termScreen').classList.add('hidden');
+  document.getElementById('mosqueScreenTitle').innerText = db.termLabel;
+  document.getElementById('mosqueScreenSub').innerText = db.term === 'summer'
+    ? 'اختر المسجد الخاص بالفصل الصيفي، ثم اختر الشيخ'
+    : 'اختر المسجد، ثم اختر الشيخ';
   document.getElementById('mosqueScreen').classList.remove('hidden');
 }
 
+function getMosqueKey(m) {
+  return db.term === 'summer' ? ('الفصل الصيفي - ' + m) : m;
+}
+
+function getMosqueDisplayName() {
+  return (db.term === 'summer' ? 'الفصل الصيفي — ' : '') + (db.displayMosque || db.mosque || '');
+}
+
 function setMosque(m) {
-  db.mosque = m;
-  document.getElementById('mosqueLabel').innerText = m;
+  db.displayMosque = m;
+  db.mosque = getMosqueKey(m);
+  document.getElementById('mosqueLabel').innerText = getMosqueDisplayName();
   document.getElementById('mosqueScreen').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 
-// الفصل الصيفي يعمل كمسار مستقل داخل قاعدة البيانات:
-// كل الطلاب والكشوفات تُحفظ تحت mosque = 'الفصل الصيفي'
-// لذلك لا تظهر بيانات المساجد القديمة داخله.
-function setSummerTerm() {
-  setMosque('الفصل الصيفي');
+function backToTermSelect() {
+  document.getElementById('mosqueScreen').classList.add('hidden');
+  document.getElementById('termScreen').classList.remove('hidden');
 }
 
 function backToMosqueSelect() {
@@ -855,7 +889,7 @@ function showDashboard() {
   var dn = db.user.name;
   if ((db.user.role === 'teacher' || db.user.role === 'parent') && hideTeacher(db.user.group)) dn = db.user.group;
   document.getElementById('userNameDisplay').innerText = dn;
-  document.getElementById('mosqueNameDisplay').innerText = db.mosque;
+  document.getElementById('mosqueNameDisplay').innerText = getMosqueDisplayName();
   if (db.user.role === 'admin') {
     ['adminArchiveBtn','adminStatsBtn','adminPrintBtn','addStdBtn','adminStats','adabBtn','statsChartBtn','hifzAchieveBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
   } else if (db.user.role === 'teacher') {
