@@ -240,13 +240,17 @@ function sbSelect(table, orderCol, orderDesc) {
 
 <div class="live-header"><div id="liveDate"></div><div id="liveTime"></div></div>
 
-<!-- اختيار المسجد -->
+<!-- اختيار المسجد / الفصل -->
 <section id="mosqueScreen" class="container hidden">
   <div style="text-align:center;margin-top:40px">
     <h1 style="color:var(--primary);font-size:1.8rem">نظام إدارة حلقات دار القرآن الكريم</h1>
-    <p style="color:var(--gray);margin-top:10px">يرجى اختيار المسجد للمتابعة</p>
+    <p style="color:var(--gray);margin-top:10px">يرجى اختيار المسار للمتابعة</p>
   </div>
   <div style="max-width:500px;margin:30px auto 0">
+    <button class="btn btn-gold btn-block" style="margin-bottom:15px;font-size:1.05rem;border:2px solid #facc15;box-shadow:0 6px 18px rgba(180,83,9,.22)" onclick="setSummerTerm()">
+      ☀️ الفصل الصيفي
+    </button>
+    <div style="text-align:center;color:var(--gray);font-size:.85rem;margin:12px 0">أو اختر أحد المساجد القديمة</div>
     <button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد طارق بن زياد الكبير')">مسجد طارق بن زياد الكبير</button>
     <button class="btn btn-primary btn-block" onclick="setMosque('مسجد الحاجة مريم')">مسجد الحاجة مريم</button>
   </div>
@@ -790,6 +794,14 @@ function setMosque(m) {
   document.getElementById('mosqueScreen').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
 }
+
+// الفصل الصيفي يعمل كمسار مستقل داخل قاعدة البيانات:
+// كل الطلاب والكشوفات تُحفظ تحت mosque = 'الفصل الصيفي'
+// لذلك لا تظهر بيانات المساجد القديمة داخله.
+function setSummerTerm() {
+  setMosque('الفصل الصيفي');
+}
+
 function backToMosqueSelect() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('mosqueScreen').classList.remove('hidden');
