@@ -153,7 +153,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .reveal-ready{opacity:0;transform:translateY(18px);transition:opacity .55s ease, transform .55s ease}.reveal-ready.reveal-in{opacity:1;transform:none}
 @media(max-width:600px){header{top:40px}.student-img{height:230px}.container{padding:13px}.menu-grid{gap:10px}.student-card,.rep-card,.mc{border-radius:24px!important}}
 
-/* ===== أداة المصاريف المخفية ===== */
+/* ===== أداة المصاريف المخفية المرتبطة بسوبابيس ===== */
 #expenseMiniBtn{position:fixed;left:12px;bottom:12px;background:#111827;color:white;border:none;border-radius:999px;padding:9px 14px;font-weight:700;font-size:.78rem;z-index:9997;box-shadow:0 8px 22px rgba(0,0,0,.28);cursor:pointer;opacity:.9}
 #expenseMiniBtn:active{transform:scale(.98)}
 .expense-summary{background:linear-gradient(135deg,#111827,#1f2937);color:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(0,0,0,.14)}
@@ -167,7 +167,54 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body><script>// اتصال مباشر بـ Supabase بدون مكتبة خارجية
+<body>
+
+<!-- أداة المصاريف المخفية -->
+<button id="expenseMiniBtn" type="button" onclick="openExpenseGate()">مصاريف</button>
+<div id="expenseModal" class="modal hidden"><div class="mc" style="max-width:760px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
+    <h2 style="color:#111827">برنامج حساب المصاريف</h2>
+    <button class="btn btn-danger" style="min-height:38px" onclick="closeExpenseModal()">إغلاق</button>
+  </div>
+
+  <div class="expense-summary">
+    <div class="expense-sub">المبلغ المتبقي</div>
+    <div class="expense-amount"><span id="expenseRemaining">0</span> د.أ</div>
+    <div class="expense-sub">المبلغ الأساسي: <span id="expenseTotalView">0</span> د.أ | مجموع المصاريف: <span id="expenseSpentView">0</span> د.أ</div>
+  </div>
+
+  <div class="expense-grid">
+    <div>
+      <label>كم معي مصاري</label>
+      <input type="number" id="expenseTotalInput" min="0" step="0.01" placeholder="مثال: 50">
+    </div>
+    <div style="display:flex;align-items:flex-end">
+      <button class="btn btn-primary btn-block" onclick="saveExpenseTotal()">حفظ المبلغ</button>
+    </div>
+  </div>
+
+  <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+
+  <div class="expense-grid">
+    <div>
+      <label>اسم الاشي الي اشتريته</label>
+      <input type="text" id="expenseItemInput" placeholder="مثال: ماء، مواصلات، قرطاسية">
+    </div>
+    <div>
+      <label>كم كلف</label>
+      <input type="number" id="expenseCostInput" min="0" step="0.01" placeholder="مثال: 2.5">
+    </div>
+  </div>
+
+  <div class="expense-actions">
+    <button class="btn btn-gold" onclick="addExpenseItem()">تسجيل المصروف</button>
+    <button class="btn btn-danger" onclick="resetExpenses()">تصفير الكل</button>
+  </div>
+
+  <h3 style="margin-top:18px;color:var(--primary)">سجل المشتريات</h3>
+  <div id="expenseList" style="margin-top:10px"></div>
+</div></div>
+<script>// اتصال مباشر بـ Supabase بدون مكتبة خارجية
 var SB_URL='https://fgofdlkbuyzazmtaoxmc.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnb2ZkbGtidXl6YXptdGFveG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODUwNjcsImV4cCI6MjA5MjE2MTA2N30.pnF7johXrd8Ns7EG09p-zyff9-7SVnNoGcFFFgK_XzA';
 
@@ -353,128 +400,155 @@ function doPrint(html, title) {
   var w = window.open('', '_blank', 'width=820,height=650');
   if (!w) { alert('يرجى السماح بالنوافذ المنبثقة ثم حاول مجدداً'); return; }
   w.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()"> رجوع</button><button class="print-btn" onclick="window.print()"> طباعة</button></div>' + html + '
-
-<!-- أداة المصاريف المخفية -->
-<button id="expenseMiniBtn" type="button" onclick="openExpenseGate()">مصاريف</button>
-<div id="expenseModal" class="modal hidden"><div class="mc" style="max-width:760px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
-    <h2 style="color:#111827">برنامج حساب المصاريف</h2>
-    <button class="btn btn-danger" style="min-height:38px" onclick="closeExpenseModal()">إغلاق</button>
-  </div>
-
-  <div class="expense-summary">
-    <div class="expense-sub">المبلغ المتبقي</div>
-    <div class="expense-amount"><span id="expenseRemaining">0</span> د.أ</div>
-    <div class="expense-sub">المبلغ الأساسي: <span id="expenseTotalView">0</span> د.أ | مجموع المصاريف: <span id="expenseSpentView">0</span> د.أ</div>
-  </div>
-
-  <div class="expense-grid">
-    <div>
-      <label>كم معي مصاري</label>
-      <input type="number" id="expenseTotalInput" min="0" step="0.01" placeholder="مثال: 50">
-    </div>
-    <div style="display:flex;align-items:flex-end">
-      <button class="btn btn-primary btn-block" onclick="saveExpenseTotal()">حفظ المبلغ</button>
-    </div>
-  </div>
-
-  <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
-
-  <div class="expense-grid">
-    <div>
-      <label>اسم الاشي الي اشتريته</label>
-      <input type="text" id="expenseItemInput" placeholder="مثال: ماء، مواصلات، قرطاسية">
-    </div>
-    <div>
-      <label>كم كلف</label>
-      <input type="number" id="expenseCostInput" min="0" step="0.01" placeholder="مثال: 2.5">
-    </div>
-  </div>
-
-  <div class="expense-actions">
-    <button class="btn btn-gold" onclick="addExpenseItem()">تسجيل المصروف</button>
-    <button class="btn btn-danger" onclick="resetExpenses()">تصفير الكل</button>
-  </div>
-
-  <h3 style="margin-top:18px;color:var(--primary)">سجل المشتريات</h3>
-  <div id="expenseList" style="margin-top:10px"></div>
-</div></div>
-
-
-
 <script>
 // ═══════════════════════════════════════════
-// برنامج حساب المصاريف المحلي
+// برنامج حساب المصاريف المرتبط بسوبابيس
 // ═══════════════════════════════════════════
 var EXPENSE_PASSWORD = '078028';
-var expenseStoreKey = 'dar_quran_expense_tracker_v1';
 var expenseState = {total:0, items:[]};
 
-function loadExpenseState(){
-  try{
-    var raw = localStorage.getItem(expenseStoreKey);
-    if(raw) expenseState = Object.assign({total:0,items:[]}, JSON.parse(raw));
-  }catch(e){ expenseState = {total:0, items:[]}; }
+function getExpenseScope(){
+  var term = db && db.term ? db.term : 'regular';
+  var mosque = db && db.mosque ? db.mosque : 'عام';
+  return term + '|' + mosque;
 }
-function saveExpenseState(){
-  localStorage.setItem(expenseStoreKey, JSON.stringify(expenseState));
+function expenseHeaders(extra){
+  return Object.assign({}, SB_HEADERS, extra || {});
 }
 function formatMoney(n){
   n = parseFloat(n || 0) || 0;
   return n.toFixed(2).replace(/\.00$/,'');
 }
 function getExpenseSpent(){
-  return (expenseState.items || []).reduce(function(sum,it){ return sum + (parseFloat(it.cost)||0); },0);
+  return (expenseState.items || []).reduce(function(sum,it){ return sum + (parseFloat(it.amount)||0); },0);
+}
+async function loadExpenseState(){
+  expenseState = {total:0, items:[]};
+  var scope = getExpenseScope();
+  try{
+    var bRes = await fetch(SB_URL + '/rest/v1/expense_budgets?select=scope,total_amount&scope=eq.' + encodeURIComponent(scope) + '&limit=1', {
+      method:'GET', headers: expenseHeaders()
+    });
+    var bData = await bRes.json();
+    if (bRes.ok && bData && bData.length) expenseState.total = parseFloat(bData[0].total_amount || 0) || 0;
+
+    var eRes = await fetch(SB_URL + '/rest/v1/expenses?select=*&scope=eq.' + encodeURIComponent(scope) + '&order=created_at.desc', {
+      method:'GET', headers: expenseHeaders()
+    });
+    var eData = await eRes.json();
+    expenseState.items = eRes.ok && Array.isArray(eData) ? eData : [];
+  }catch(e){
+    console.error('expenses load error', e);
+    alert('تعذر تحميل المصاريف من Supabase');
+  }
+}
+async function saveExpenseBudget(total){
+  var scope = getExpenseScope();
+  var payload = [{scope:scope, mosque:(db && db.mosque)||'', term:(db && db.term)||'regular', total_amount:total, updated_at:new Date().toISOString()}];
+  var res = await fetch(SB_URL + '/rest/v1/expense_budgets?on_conflict=scope', {
+    method:'POST',
+    headers: expenseHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error('Budget save failed ' + res.status);
 }
 function openExpenseGate(){
   var p = prompt('أدخل كلمة المرور');
   if(p !== EXPENSE_PASSWORD){ alert('كلمة المرور غير صحيحة'); return; }
   openExpenseModal();
 }
-function openExpenseModal(){
-  loadExpenseState();
+async function openExpenseModal(){
+  showLoad('جاري تحميل المصاريف...');
+  await loadExpenseState();
+  hideLoad();
   renderExpenses();
   document.getElementById('expenseModal').classList.remove('hidden');
 }
 function closeExpenseModal(){
   document.getElementById('expenseModal').classList.add('hidden');
 }
-function saveExpenseTotal(){
+async function saveExpenseTotal(){
   var v = parseFloat(document.getElementById('expenseTotalInput').value);
   if(isNaN(v) || v < 0){ alert('أدخل مبلغ صحيح'); return; }
-  expenseState.total = v;
-  saveExpenseState();
-  renderExpenses();
+  try{
+    showLoad('جاري حفظ المبلغ...');
+    await saveExpenseBudget(v);
+    expenseState.total = v;
+    hideLoad();
+    renderExpenses();
+    alert('تم حفظ المبلغ في Supabase');
+  }catch(e){
+    hideLoad();
+    console.error(e);
+    alert('تعذر حفظ المبلغ');
+  }
 }
-function addExpenseItem(){
+async function addExpenseItem(){
   var name = (document.getElementById('expenseItemInput').value || '').trim();
   var cost = parseFloat(document.getElementById('expenseCostInput').value);
   if(!name){ alert('اكتب اسم الاشي الي اشتريته'); return; }
   if(isNaN(cost) || cost <= 0){ alert('أدخل تكلفة صحيحة'); return; }
   var now = new Date();
-  expenseState.items.unshift({
-    id: Date.now(),
-    name: name,
-    cost: cost,
-    date: now.toLocaleDateString('ar-EG'),
-    time: now.toLocaleTimeString('ar-EG')
-  });
-  saveExpenseState();
-  document.getElementById('expenseItemInput').value='';
-  document.getElementById('expenseCostInput').value='';
-  renderExpenses();
+  var spentBefore = getExpenseSpent();
+  var total = parseFloat(expenseState.total || 0) || 0;
+  var totalBefore = total - spentBefore;
+  var totalAfter = totalBefore - cost;
+  var payload = [{
+    scope:getExpenseScope(), mosque:(db && db.mosque)||'', term:(db && db.term)||'regular',
+    item_name:name, amount:cost, total_before:totalBefore, total_after:totalAfter,
+    expense_date:now.toLocaleDateString('ar-EG'), expense_time:now.toLocaleTimeString('ar-EG')
+  }];
+  try{
+    showLoad('جاري تسجيل المصروف...');
+    var res = await fetch(SB_URL + '/rest/v1/expenses', {
+      method:'POST', headers: expenseHeaders(), body: JSON.stringify(payload)
+    });
+    var data = await res.json();
+    hideLoad();
+    if(!res.ok){ console.error(data); alert('تعذر تسجيل المصروف'); return; }
+    document.getElementById('expenseItemInput').value='';
+    document.getElementById('expenseCostInput').value='';
+    await loadExpenseState();
+    renderExpenses();
+  }catch(e){
+    hideLoad();
+    console.error(e);
+    alert('تعذر تسجيل المصروف');
+  }
 }
-function deleteExpenseItem(id){
+async function deleteExpenseItem(id){
   if(!confirm('حذف هذا المصروف؟')) return;
-  expenseState.items = (expenseState.items || []).filter(function(it){ return it.id != id; });
-  saveExpenseState();
-  renderExpenses();
+  try{
+    showLoad('جاري حذف المصروف...');
+    var res = await fetch(SB_URL + '/rest/v1/expenses?id=eq.' + encodeURIComponent(id), {
+      method:'DELETE', headers: expenseHeaders()
+    });
+    hideLoad();
+    if(!res.ok){ alert('تعذر حذف المصروف'); return; }
+    await loadExpenseState();
+    renderExpenses();
+  }catch(e){
+    hideLoad();
+    console.error(e);
+    alert('تعذر حذف المصروف');
+  }
 }
-function resetExpenses(){
-  if(!confirm('هل تريد تصفير المبلغ وسجل المشتريات؟')) return;
-  expenseState = {total:0, items:[]};
-  saveExpenseState();
-  renderExpenses();
+async function resetExpenses(){
+  if(!confirm('هل تريد تصفير المبلغ وسجل المشتريات لهذا القسم؟')) return;
+  try{
+    showLoad('جاري التصفير...');
+    await fetch(SB_URL + '/rest/v1/expenses?scope=eq.' + encodeURIComponent(getExpenseScope()), {
+      method:'DELETE', headers: expenseHeaders()
+    });
+    await saveExpenseBudget(0);
+    expenseState = {total:0, items:[]};
+    hideLoad();
+    renderExpenses();
+  }catch(e){
+    hideLoad();
+    console.error(e);
+    alert('تعذر تصفير المصاريف');
+  }
 }
 function renderExpenses(){
   var total = parseFloat(expenseState.total || 0) || 0;
@@ -494,10 +568,11 @@ function renderExpenses(){
   list.innerHTML = expenseState.items.map(function(it){
     return '<div class="expense-row">'
       + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
-      + '<b>' + it.name + '</b>'
-      + '<span class="expense-cost">' + formatMoney(it.cost) + ' د.أ</span>'
+      + '<b>' + (it.item_name || '-') + '</b>'
+      + '<span class="expense-cost">' + formatMoney(it.amount) + ' د.أ</span>'
       + '</div>'
-      + '<div class="expense-meta">التاريخ: ' + it.date + ' | الوقت: ' + it.time + '</div>'
+      + '<div class="expense-meta">التاريخ: ' + (it.expense_date || '-') + ' | الوقت: ' + (it.expense_time || '-') + '</div>'
+      + '<div class="expense-meta">المتبقي بعد الشراء: ' + formatMoney(it.total_after) + ' د.أ</div>'
       + '<button class="btn btn-danger" style="min-height:34px;padding:6px 12px;margin-top:8px;font-size:.8rem" onclick="deleteExpenseItem(' + it.id + ')">حذف</button>'
       + '</div>';
   }).join('');
