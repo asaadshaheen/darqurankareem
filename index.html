@@ -1134,11 +1134,12 @@ function printHifzAll() {
   var rows='';
   students.forEach(function(s,i){
     var mem=getHifz(s.id,curHifzJuz); var pct=total>0?Math.round((mem.length/total)*100):0;
-    rows+='<tr><td style="text-align:center;font-weight:bold">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td style="text-align:center;font-weight:bold;color:#064e3b">'+mem.length+'/'+total+' ('+pct+'%)</td><td style="font-size:10px;color:#166534">'+(mem.length>0?mem.join(' · '):'-')+'</td><td style="font-size:10px;color:#991b1b">'+(suwar.filter(function(sr){return!mem.includes(sr);}).join(' · ')||'أتم الجزء ')+'</td></tr>';
+    var grade = s.age || '-';
+    rows+='<tr><td style="text-align:center;font-weight:bold">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td style="text-align:center;font-weight:bold">'+grade+'</td><td style="text-align:center;font-weight:bold;color:#064e3b">'+mem.length+'/'+total+' ('+pct+'%)</td><td style="font-size:10px;color:#166534">'+(mem.length>0?mem.join(' · '):'-')+'</td><td style="font-size:10px;color:#991b1b">'+(suwar.filter(function(sr){return!mem.includes(sr);}).join(' · ')||'أتم الجزء ')+'</td></tr>';
   });
   var now=new Date();
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>كشف متابعة الحفظ — '+juzName+' — مجموعة الأشبال</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+' | عدد الطلاب: '+students.length+' | إجمالي السور: '+total+'</p></div>'
-    +'<table><thead><tr><th style="width:4%">#</th><th style="width:16%">اسم الطالب</th><th style="width:12%">السور المحفوظة</th><th style="width:34%">السور المحفوظة</th><th style="width:34%">السور المتبقية</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<table><thead><tr><th style="width:4%">#</th><th style="width:18%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:12%">السور المحفوظة</th><th style="width:28%">السور المحفوظة</th><th style="width:28%">السور المتبقية</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
     'كشف الحفظ - '+juzName);
 }
