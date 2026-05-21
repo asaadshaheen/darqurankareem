@@ -154,7 +154,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 @media(max-width:600px){header{top:40px}.student-img{height:230px}.container{padding:13px}.menu-grid{gap:10px}.student-card,.rep-card,.mc{border-radius:24px!important}}
 
 /* ===== أداة المصاريف المخفية المرتبطة بسوبابيس ===== */
-#expenseMiniBtn{position:fixed;left:8px;bottom:8px;background:#111827;color:white;border:none;border-radius:999px;padding:4px 8px;font-weight:700;font-size:.62rem;z-index:9997;box-shadow:0 5px 14px rgba(0,0,0,.24);cursor:pointer;opacity:.78;min-height:24px;line-height:1}
+#expenseMiniBtn{position:fixed;left:8px;bottom:8px;background:#111827;color:white;border:none;border-radius:999px;padding:3px 7px;font-weight:700;font-size:.58rem;z-index:9997;box-shadow:0 5px 14px rgba(0,0,0,.24);cursor:pointer;opacity:.75;min-height:22px;line-height:1}
 #expenseMiniBtn:active{transform:scale(.98)}
 .expense-summary{background:linear-gradient(135deg,#111827,#1f2937);color:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(0,0,0,.14)}
 .expense-amount{font-size:2rem;font-weight:800;line-height:1.2;color:#fde68a}.expense-sub{font-size:.85rem;color:rgba(255,255,255,.75)}
@@ -165,13 +165,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 @media(min-width:700px){.expense-grid{grid-template-columns:1fr 1fr}}
 
 /* عارض الجداول داخل البرنامج */
-.table-view-wrap{overflow:auto;max-height:70vh;border:1px solid var(--bdr);border-radius:14px;background:#fff}
-.table-view-wrap table{width:100%;border-collapse:collapse;font-size:1rem;min-width:620px}
-.table-view-wrap th{background:var(--primary);color:white;padding:12px 10px;text-align:right;font-size:1rem;position:sticky;top:0;z-index:2}
-.table-view-wrap td{padding:11px 10px;border-bottom:1px solid var(--bdr);text-align:right;font-size:1rem;font-weight:600}
-.table-view-wrap tr:nth-child(even) td{background:#f8fafc}
-.table-view-wrap .ph,.table-view-wrap .pf,.table-view-wrap .top-bar,.table-view-wrap hr{display:none!important}
-.btn-table{background:#111827;color:white}
+
+
+.auto-close-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;border-bottom:1px solid #eee;padding-bottom:10px}
+.auto-close-head .auto-title{font-weight:800;color:var(--primary);font-size:1.15rem}
+.auto-close-head .btn{min-height:38px;padding:8px 14px}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -182,14 +180,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 <button id="expenseMiniBtn" type="button" onclick="openExpenseGate()" style="display:none">التعديلات</button>
 <div id="expenseModal" class="modal hidden"><div class="mc" style="max-width:760px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
-    <h2 style="color:#111827">برنامج حساب المصاريف</h2>
+    <h2 style="color:#111827">التعديلات</h2>
     <button class="btn btn-danger" style="min-height:38px" onclick="closeExpenseModal()">إغلاق</button>
   </div>
 
   <div class="expense-summary">
     <div class="expense-sub">المبلغ المتبقي</div>
     <div class="expense-amount"><span id="expenseRemaining">0</span> د.أ</div>
-    <div class="expense-sub">المبلغ الأساسي: <span id="expenseTotalView">0</span> د.أ | مجموع المصاريف: <span id="expenseSpentView">0</span> د.أ</div>
+    <div class="expense-sub">المبلغ الأساسي: <span id="expenseTotalView">0</span> د.أ | الدخل: <span id="expenseIncomeView">0</span> د.أ | المصاريف: <span id="expenseSpentView">0</span> د.أ</div>
   </div>
 
   <div class="expense-grid">
@@ -204,6 +202,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 
   <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
 
+  <h3 style="color:var(--primary);margin-bottom:8px">إضافة دخل</h3>
+  <div class="expense-grid">
+    <div>
+      <label>مصدر الدخل</label>
+      <input type="text" id="incomeItemInput" placeholder="مثال: تبرع، دعم، رصيد إضافي">
+    </div>
+    <div>
+      <label>قيمة الدخل</label>
+      <input type="number" id="incomeAmountInput" min="0" step="0.01" placeholder="مثال: 20">
+    </div>
+  </div>
+  <div class="expense-actions">
+    <button class="btn btn-primary" onclick="addIncomeItem()">تسجيل الدخل</button>
+  </div>
+
+  <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+
+  <h3 style="color:var(--primary);margin-bottom:8px">تسجيل مصروف</h3>
   <div class="expense-grid">
     <div>
       <label>اسم الاشي الي اشتريته</label>
@@ -220,7 +236,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
     <button class="btn btn-danger" onclick="resetExpenses()">تصفير الكل</button>
   </div>
 
-  <h3 style="margin-top:18px;color:var(--primary)">سجل المشتريات</h3>
+  <h3 style="margin-top:18px;color:var(--primary)">سجل الدخل والمصاريف</h3>
   <div id="expenseList" style="margin-top:10px"></div>
 </div></div>
 <script>// اتصال مباشر بـ Supabase بدون مكتبة خارجية
@@ -329,14 +345,7 @@ function sbSelect(table, orderCol, orderDesc) {
 </div></div><!-- Modal: الأرشيف -->
 <div id="archiveModal" class="modal hidden"><div class="mc"><h2 style="margin-bottom:12px;color:var(--primary)">أرشيف الكشوفات</h2><div class="srch"><input type="search" id="archSearch" placeholder=" ابحث..." oninput="filterArchive()"></div><div id="archGrid" class="rep-grid"></div><button class="btn btn-danger btn-block" style="margin-top:20px" onclick="closeArchiveModal()">إغلاق</button>
 </div></div><!-- Modal: عرض الكشف -->
-<div id="repViewModal" class="modal hidden"><div class="mc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:10px;flex-wrap:wrap;gap:8px"><h2 id="repViewTitle">تفاصيل الكشف</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-table" style="min-height:38px" onclick="showReportTable(activeViewRepId)">عرض كجدول</button><button class="btn btn-gold" style="min-height:38px" onclick="printReport()"> طباعة</button></div></div><div class="srch"><input type="search" id="repSearch" placeholder=" ابحث..." oninput="filterRepDetail()"></div><div id="repDetailList"></div><button class="btn btn-danger btn-block" style="margin-top:20px" onclick="closeRepView()">إغلاق</button>
-</div></div><!-- Modal: عرض كجدول داخل البرنامج -->
-<div id="tableViewModal" class="modal hidden"><div class="mc" style="max-width:1000px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
-    <h2 id="tableViewTitle" style="color:var(--primary)">عرض كجدول</h2>
-    <button class="btn btn-danger" style="min-height:38px" onclick="closeTableView()">إغلاق</button>
-  </div>
-  <div id="tableViewContent" class="table-view-wrap"></div>
+<div id="repViewModal" class="modal hidden"><div class="mc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:10px;flex-wrap:wrap;gap:8px"><h2 id="repViewTitle">تفاصيل الكشف</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" style="min-height:38px" onclick="printReport()"> طباعة</button></div></div><div class="srch"><input type="search" id="repSearch" placeholder=" ابحث..." oninput="filterRepDetail()"></div><div id="repDetailList"></div><button class="btn btn-danger btn-block" style="margin-top:20px" onclick="closeRepView()">إغلاق</button>
 </div></div><!-- Modal: إحصائيات الغياب -->
 <div id="absModal" class="modal hidden"><div class="mc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:var(--danger)"> إحصائيات الغياب</h2><div style="display:flex;gap:8px"><button class="btn btn-gold" style="min-height:38px" onclick="printAbsStats()"> طباعة</button><button class="btn btn-danger" style="min-height:38px" onclick="closeAbsModal()">إغلاق</button></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px"><div style="flex:1;min-width:160px"><label>تصفية</label><select id="absFilter" onchange="renderAbsStats()"><option value="all">كل المجموعات</option><option value="مجموعة أهل القرآن">مجموعة أهل القرآن</option><option value="مجموعة الفتية">مجموعة الفتية</option><option value="مجموعة الأشبال">مجموعة الأشبال</option></select></div><div style="flex:1;min-width:160px"><label>بحث</label><input type="search" id="absSearch" placeholder=" اسم الطالب..." oninput="renderAbsStats()"></div></div><div id="absContent"></div><div style="margin-top:12px;font-size:.8rem;color:var(--gray);display:flex;gap:12px;flex-wrap:wrap"><span><span class="absbdg ab-low">0-4</span> منتظم</span><span><span class="absbdg ab-mid">5-7</span> يحتاج متابعة</span><span><span class="absbdg ab-high">8+</span> غياب متكرر</span></div>
 </div></div><!-- Modal: الحفظ -->
@@ -421,80 +430,6 @@ function doPrint(html, title) {
   w.document.close();
 }
 
-function showPrintAsTable(printFunctionName) {
-  var fn = window[printFunctionName];
-  if (typeof fn !== 'function') { alert('لا يمكن عرض هذا التقرير كجدول حالياً'); return; }
-  var oldDoPrint = window.doPrint;
-  window.doPrint = function(html, title) {
-    window.doPrint = oldDoPrint;
-    openTableView(html, title || 'عرض كجدول');
-  };
-  try { fn(); }
-  catch(e) { window.doPrint = oldDoPrint; console.error(e); alert('تعذر عرض البيانات كجدول'); }
-}
-
-function openTableView(html, title) {
-  var box = document.getElementById('tableViewContent');
-  var ttl = document.getElementById('tableViewTitle');
-  if (!box || !ttl) return;
-  ttl.innerText = title || 'عرض كجدول';
-  box.innerHTML = html || '<p style="padding:20px;text-align:center;color:var(--gray)">لا توجد بيانات</p>';
-  box.querySelectorAll('button').forEach(function(b){ b.remove(); });
-  document.getElementById('tableViewModal').classList.remove('hidden');
-}
-
-function closeTableView() { document.getElementById('tableViewModal').classList.add('hidden'); }
-
-function buildReportTableHtml(id) {
-  var report = db.reports.find(function(x) { return x.id == id; });
-  if (!report) return '<p style="padding:20px;text-align:center;color:var(--gray)">لم يتم العثور على الكشف</p>';
-  var rows = '';
-  Object.entries(report.students_data || {}).forEach(function(entry, idx) {
-    var sid = entry[0];
-    var att = entry[1] || {};
-    var st = db.students.find(function(x) { return x.id == sid; });
-    var status = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
-    rows += '<tr>'
-      + '<td>' + (idx + 1) + '</td>'
-      + '<td style="font-weight:800;color:var(--primary)">' + (st ? st.name : 'محذوف') + '</td>'
-      + '<td>' + (st ? (st.age || '-') : '-') + '</td>'
-      + '<td>' + status + '</td>'
-      + '<td>' + (att.status === 'present' ? (att.today || '-') : '-') + '</td>'
-      + '<td>' + (att.status === 'present' ? (att.rating || '-') : '-') + '</td>'
-      + '<td>' + (att.status === 'present' ? (att.required || '-') : '-') + '</td>'
-      + '</tr>';
-  });
-  return '<div style="margin-bottom:12px;background:#f8fafc;border:1px solid var(--bdr);border-radius:12px;padding:12px;font-weight:bold">'
-    + 'الكشف: ' + report.group_name + ' | التاريخ: ' + report.report_date + ' | المعلم: ' + (report.teacher_name || '-')
-    + '</div>'
-    + '<table><thead><tr><th>#</th><th>اسم الطالب</th><th>الصف</th><th>الحالة</th><th>التسميع</th><th>التقييم</th><th>المطلوب للمرة القادمة</th></tr></thead><tbody>'
-    + rows + '</tbody></table>';
-}
-
-function showReportTable(id) {
-  if (!id) { alert('اختر كشفاً أولاً'); return; }
-  var report = db.reports.find(function(x) { return x.id == id; });
-  var title = report ? ('عرض كجدول - ' + report.group_name + ' (' + report.report_date + ')') : 'عرض كجدول';
-  openTableView(buildReportTableHtml(id), title);
-}
-
-
-function addTableViewButtons() {
-  document.querySelectorAll('button[onclick^="print"]').forEach(function(btn) {
-    if (btn.dataset.tableAdded === '1') return;
-    var onclick = btn.getAttribute('onclick') || '';
-    var m = onclick.match(/^([a-zA-Z0-9_]+)\(\)$/);
-    if (!m) return;
-    var clone = document.createElement('button');
-    clone.type = 'button';
-    clone.className = 'btn btn-table';
-    clone.style.minHeight = btn.style.minHeight || '38px';
-    clone.textContent = 'عرض كجدول';
-    clone.onclick = function(){ showPrintAsTable(m[1]); };
-    btn.insertAdjacentElement('afterend', clone);
-    btn.dataset.tableAdded = '1';
-  });
-}
 
 // ═══════════════════════════════════════════
 // برنامج حساب المصاريف المرتبط بسوبابيس
@@ -515,7 +450,10 @@ function formatMoney(n){
   return n.toFixed(2).replace(/\.00$/,'');
 }
 function getExpenseSpent(){
-  return (expenseState.items || []).reduce(function(sum,it){ return sum + (parseFloat(it.amount)||0); },0);
+  return (expenseState.items || []).reduce(function(sum,it){ var a=parseFloat(it.amount)||0; return sum + (a > 0 ? a : 0); },0);
+}
+function getExpenseIncome(){
+  return (expenseState.items || []).reduce(function(sum,it){ var a=parseFloat(it.amount)||0; return sum + (a < 0 ? Math.abs(a) : 0); },0);
 }
 async function loadExpenseState(){
   expenseState = {total:0, items:[]};
@@ -585,8 +523,9 @@ async function addExpenseItem(){
   if(isNaN(cost) || cost <= 0){ alert('أدخل تكلفة صحيحة'); return; }
   var now = new Date();
   var spentBefore = getExpenseSpent();
+  var incomeBefore = getExpenseIncome();
   var total = parseFloat(expenseState.total || 0) || 0;
-  var totalBefore = total - spentBefore;
+  var totalBefore = total + incomeBefore - spentBefore;
   var totalAfter = totalBefore - cost;
   var payload = [{
     scope:getExpenseScope(), mosque:(db && db.mosque)||'', term:(db && db.term)||'regular',
@@ -609,6 +548,38 @@ async function addExpenseItem(){
     hideLoad();
     console.error(e);
     alert('تعذر تسجيل المصروف');
+  }
+}
+async function addIncomeItem(){
+  var name = (document.getElementById('incomeItemInput').value || '').trim();
+  var val = parseFloat(document.getElementById('incomeAmountInput').value);
+  if(!name){ alert('اكتب مصدر الدخل'); return; }
+  if(isNaN(val) || val <= 0){ alert('أدخل قيمة دخل صحيحة'); return; }
+  var now = new Date();
+  var total = parseFloat(expenseState.total || 0) || 0;
+  var incomeBefore = getExpenseIncome();
+  var spent = getExpenseSpent();
+  var totalBefore = total + incomeBefore - spent;
+  var totalAfter = totalBefore + val;
+  var payload = [{
+    scope:getExpenseScope(), mosque:(db && db.mosque)||'', term:(db && db.term)||'regular',
+    item_name:'دخل - ' + name, amount:-val, total_before:totalBefore, total_after:totalAfter,
+    expense_date:now.toLocaleDateString('ar-EG'), expense_time:now.toLocaleTimeString('ar-EG')
+  }];
+  try{
+    showLoad('جاري تسجيل الدخل...');
+    var res = await fetch(SB_URL + '/rest/v1/expenses', {
+      method:'POST', headers: expenseHeaders(), body: JSON.stringify(payload)
+    });
+    var data = await res.json();
+    hideLoad();
+    if(!res.ok){ console.error(data); alert('تعذر تسجيل الدخل'); return; }
+    document.getElementById('incomeItemInput').value='';
+    document.getElementById('incomeAmountInput').value='';
+    await loadExpenseState();
+    renderExpenses();
+  }catch(e){
+    hideLoad(); console.error(e); alert('تعذر تسجيل الدخل');
   }
 }
 async function deleteExpenseItem(id){
@@ -648,12 +619,14 @@ async function resetExpenses(){
 function renderExpenses(){
   var total = parseFloat(expenseState.total || 0) || 0;
   var spent = getExpenseSpent();
-  var remaining = total - spent;
+  var income = getExpenseIncome();
+  var remaining = total + income - spent;
   var totalInput = document.getElementById('expenseTotalInput');
   if(totalInput) totalInput.value = total ? total : '';
   document.getElementById('expenseRemaining').innerText = formatMoney(remaining);
   document.getElementById('expenseTotalView').innerText = formatMoney(total);
   document.getElementById('expenseSpentView').innerText = formatMoney(spent);
+  var incEl=document.getElementById('expenseIncomeView'); if(incEl) incEl.innerText = formatMoney(income);
   var list = document.getElementById('expenseList');
   if(!list) return;
   if(!expenseState.items || !expenseState.items.length){
@@ -664,10 +637,10 @@ function renderExpenses(){
     return '<div class="expense-row">'
       + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
       + '<b>' + (it.item_name || '-') + '</b>'
-      + '<span class="expense-cost">' + formatMoney(it.amount) + ' د.أ</span>'
+      + '<span class="expense-cost" style="color:' + ((parseFloat(it.amount)||0)<0?'#166534':'var(--danger)') + '">' + (((parseFloat(it.amount)||0)<0?'+':'-')) + formatMoney(Math.abs(parseFloat(it.amount)||0)) + ' د.أ</span>'
       + '</div>'
       + '<div class="expense-meta">التاريخ: ' + (it.expense_date || '-') + ' | الوقت: ' + (it.expense_time || '-') + '</div>'
-      + '<div class="expense-meta">المتبقي بعد الشراء: ' + formatMoney(it.total_after) + ' د.أ</div>'
+      + '<div class="expense-meta">المتبقي بعد العملية: ' + formatMoney(it.total_after) + ' د.أ</div>'
       + '<button class="btn btn-danger" style="min-height:34px;padding:6px 12px;margin-top:8px;font-size:.8rem" onclick="deleteExpenseItem(' + it.id + ')">حذف</button>'
       + '</div>';
   }).join('');
@@ -746,6 +719,41 @@ function updateExpenseMiniBtnVisibility(){
   var b=document.getElementById('expenseMiniBtn'); if(!b) return;
   var term=document.getElementById('termScreen');
   b.style.display = (term && !term.classList.contains('hidden')) ? 'inline-flex' : 'none';
+}
+function normalizeModalCloseButtons(){
+  document.querySelectorAll('.modal').forEach(function(modal){
+    var mc = modal.querySelector('.mc');
+    if(!mc || mc.getAttribute('data-close-normalized') === '1') return;
+    mc.setAttribute('data-close-normalized','1');
+    var titleText = '';
+    var firstTitle = mc.querySelector('h2');
+    if(firstTitle) titleText = firstTitle.textContent || '';
+    var closeBtn = null;
+    Array.prototype.slice.call(mc.querySelectorAll('button')).some(function(btn){
+      var txt = (btn.textContent || '').trim();
+      var on = btn.getAttribute('onclick') || '';
+      if((txt === 'إغلاق' || txt === 'إلغاء' || txt.indexOf('إغلاق') > -1) && on.indexOf('delete') === -1 && on.indexOf('حذف') === -1){ closeBtn = btn; return true; }
+      return false;
+    });
+    if(closeBtn){
+      closeBtn.classList.add('btn','btn-danger');
+      closeBtn.style.minHeight = '38px';
+      closeBtn.style.marginTop = '0';
+    } else {
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-danger';
+      closeBtn.textContent = 'إغلاق';
+      closeBtn.onclick = function(){ modal.classList.add('hidden'); };
+    }
+    var head = document.createElement('div');
+    head.className = 'auto-close-head';
+    var title = document.createElement('div');
+    title.className = 'auto-title';
+    title.textContent = titleText || 'نافذة';
+    head.appendChild(title);
+    head.appendChild(closeBtn);
+    mc.insertBefore(head, mc.firstChild);
+  });
 }
 function confirmExit(msg) { return confirm(msg || 'هل أنت متأكد من الخروج؟ قد تفقد أي بيانات غير محفوظة.'); }
 function logoutConfirm() { if (confirmExit('هل أنت متأكد من تسجيل الخروج؟')) location.reload(); }
@@ -1260,7 +1268,6 @@ function renderArchGrid(reps) {
       + '<button class="btn btn-primary" style="flex:1" onclick="viewReport(' + r.id + ')">عرض</button>'
       + '<button class="btn btn-info" style="flex:1" onclick="editAttendanceReport(' + r.id + ')">تعديل</button>'
       + '<button class="btn btn-gold" style="flex:1" onclick="printRepById(' + r.id + ')">طباعة</button>'
-      + '<button class="btn btn-table" style="flex:1" onclick="showReportTable(' + r.id + ')">عرض كجدول</button>'
       + '<button class="btn btn-danger" style="flex:1" onclick="deleteReport(' + r.id + ')">حذف</button>'
       + '</div>';
     grid.appendChild(card);
@@ -2175,9 +2182,8 @@ function startSalatReminder() {
   salatReminderTimer = setInterval(showSalatReminder, 60000);
 }
 
+normalizeModalCloseButtons();
 initApp();
-setInterval(addTableViewButtons, 1000);
-addTableViewButtons();
 startSalatReminder();
 </script><script>// Safe visual scroll reveal only; does not change data or Supabase behavior
 (function(){
