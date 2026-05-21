@@ -154,7 +154,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 @media(max-width:600px){header{top:40px}.student-img{height:230px}.container{padding:13px}.menu-grid{gap:10px}.student-card,.rep-card,.mc{border-radius:24px!important}}
 
 /* ===== أداة المصاريف المخفية المرتبطة بسوبابيس ===== */
-#expenseMiniBtn{position:fixed;left:12px;bottom:12px;background:#111827;color:white;border:none;border-radius:999px;padding:9px 14px;font-weight:700;font-size:.78rem;z-index:9997;box-shadow:0 8px 22px rgba(0,0,0,.28);cursor:pointer;opacity:.9}
+#expenseMiniBtn{position:fixed;left:8px;bottom:8px;background:#111827;color:white;border:none;border-radius:999px;padding:4px 8px;font-weight:700;font-size:.62rem;z-index:9997;box-shadow:0 5px 14px rgba(0,0,0,.24);cursor:pointer;opacity:.78;min-height:24px;line-height:1}
 #expenseMiniBtn:active{transform:scale(.98)}
 .expense-summary{background:linear-gradient(135deg,#111827,#1f2937);color:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(0,0,0,.14)}
 .expense-amount{font-size:2rem;font-weight:800;line-height:1.2;color:#fde68a}.expense-sub{font-size:.85rem;color:rgba(255,255,255,.75)}
@@ -164,13 +164,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .expense-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.expense-actions .btn{flex:1;min-width:120px}
 @media(min-width:700px){.expense-grid{grid-template-columns:1fr 1fr}}
 
+/* عارض الجداول داخل البرنامج */
+.table-view-wrap{overflow:auto;max-height:70vh;border:1px solid var(--bdr);border-radius:14px;background:#fff}
+.table-view-wrap table{width:100%;border-collapse:collapse;font-size:1rem;min-width:620px}
+.table-view-wrap th{background:var(--primary);color:white;padding:12px 10px;text-align:right;font-size:1rem;position:sticky;top:0;z-index:2}
+.table-view-wrap td{padding:11px 10px;border-bottom:1px solid var(--bdr);text-align:right;font-size:1rem;font-weight:600}
+.table-view-wrap tr:nth-child(even) td{background:#f8fafc}
+.table-view-wrap .ph,.table-view-wrap .pf,.table-view-wrap .top-bar,.table-view-wrap hr{display:none!important}
+.btn-table{background:#111827;color:white}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
 <!-- أداة المصاريف المخفية -->
-<button id="expenseMiniBtn" type="button" onclick="openExpenseGate()">مصاريف</button>
+<button id="expenseMiniBtn" type="button" onclick="openExpenseGate()" style="display:none">التعديلات</button>
 <div id="expenseModal" class="modal hidden"><div class="mc" style="max-width:760px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px">
     <h2 style="color:#111827">برنامج حساب المصاريف</h2>
@@ -396,12 +405,55 @@ const PCSS = [
   "@page{margin:9mm;size:A4 portrait}"
 ].join('');
 
+
 function doPrint(html, title) {
   var w = window.open('', '_blank', 'width=820,height=650');
   if (!w) { alert('يرجى السماح بالنوافذ المنبثقة ثم حاول مجدداً'); return; }
-  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html + '</body></html>';
+  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '
+.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html + '</body></html>';
   w.document.write(page);
   w.document.close();
+}
+
+function showPrintAsTable(printFunctionName) {
+  var fn = window[printFunctionName];
+  if (typeof fn !== 'function') { alert('لا يمكن عرض هذا التقرير كجدول حالياً'); return; }
+  var oldDoPrint = window.doPrint;
+  window.doPrint = function(html, title) {
+    window.doPrint = oldDoPrint;
+    openTableView(html, title || 'عرض كجدول');
+  };
+  try { fn(); }
+  catch(e) { window.doPrint = oldDoPrint; console.error(e); alert('تعذر عرض البيانات كجدول'); }
+}
+
+function openTableView(html, title) {
+  var box = document.getElementById('tableViewContent');
+  var ttl = document.getElementById('tableViewTitle');
+  if (!box || !ttl) return;
+  ttl.innerText = title || 'عرض كجدول';
+  box.innerHTML = html || '<p style="padding:20px;text-align:center;color:var(--gray)">لا توجد بيانات</p>';
+  box.querySelectorAll('button').forEach(function(b){ b.remove(); });
+  document.getElementById('tableViewModal').classList.remove('hidden');
+}
+
+function closeTableView() { document.getElementById('tableViewModal').classList.add('hidden'); }
+
+function addTableViewButtons() {
+  document.querySelectorAll('button[onclick^="print"]').forEach(function(btn) {
+    if (btn.dataset.tableAdded === '1') return;
+    var onclick = btn.getAttribute('onclick') || '';
+    var m = onclick.match(/^([a-zA-Z0-9_]+)\(\)$/);
+    if (!m) return;
+    var clone = document.createElement('button');
+    clone.type = 'button';
+    clone.className = 'btn btn-table';
+    clone.style.minHeight = btn.style.minHeight || '38px';
+    clone.textContent = 'عرض كجدول';
+    clone.onclick = function(){ showPrintAsTable(m[1]); };
+    btn.insertAdjacentElement('afterend', clone);
+    btn.dataset.tableAdded = '1';
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -650,6 +702,11 @@ function getHifzTrendData(sid) {
 
 function showLoad(m) { document.getElementById('loadingText').innerText = m || 'جاري التحميل...'; document.getElementById('loadingOverlay').style.display = 'flex'; }
 function hideLoad() { document.getElementById('loadingOverlay').style.display = 'none'; }
+function updateExpenseMiniBtnVisibility(){
+  var b=document.getElementById('expenseMiniBtn'); if(!b) return;
+  var term=document.getElementById('termScreen');
+  b.style.display = (term && !term.classList.contains('hidden')) ? 'inline-flex' : 'none';
+}
 function confirmExit(msg) { return confirm(msg || 'هل أنت متأكد من الخروج؟ قد تفقد أي بيانات غير محفوظة.'); }
 function logoutConfirm() { if (confirmExit('هل أنت متأكد من تسجيل الخروج؟')) location.reload(); }
 function hideTeacher(g) { return db.displayMosque === 'مسجد طارق بن زياد الكبير' && HIDE_GROUPS.includes(g); }
@@ -696,6 +753,7 @@ async function initApp() {
   }
   hideLoad();
   document.getElementById('termScreen').classList.remove('hidden');
+  updateExpenseMiniBtnVisibility();
 }
 
 function selectTerm(term) {
@@ -705,6 +763,7 @@ function selectTerm(term) {
   db.displayMosque = '';
 
   document.getElementById('termScreen').classList.add('hidden');
+  updateExpenseMiniBtnVisibility();
   document.getElementById('mosqueScreenTitle').innerText = db.termLabel;
   document.getElementById('mosqueScreenSub').innerText = db.term === 'summer'
     ? 'اختر المسجد الخاص بالفصل الصيفي، ثم اختر الشيخ'
@@ -758,6 +817,7 @@ function setMosque(m) {
 function backToTermSelect() {
   document.getElementById('mosqueScreen').classList.add('hidden');
   document.getElementById('termScreen').classList.remove('hidden');
+  updateExpenseMiniBtnVisibility();
 }
 
 function backToMosqueSelect() {
@@ -811,6 +871,7 @@ function loginParent() {
 function showDashboard() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('dashboardArea').classList.remove('hidden');
+  updateExpenseMiniBtnVisibility();
   var dn = db.user.name;
   if ((db.user.role === 'teacher' || db.user.role === 'parent') && hideTeacher(db.user.group)) dn = db.user.group;
   document.getElementById('userNameDisplay').innerText = dn;
@@ -2074,6 +2135,8 @@ function startSalatReminder() {
 }
 
 initApp();
+setInterval(addTableViewButtons, 1000);
+addTableViewButtons();
 startSalatReminder();
 </script><script>// Safe visual scroll reveal only; does not change data or Supabase behavior
 (function(){
