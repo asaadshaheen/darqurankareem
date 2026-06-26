@@ -171,58 +171,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .auto-close-head .auto-title{font-weight:800;color:var(--primary);font-size:1.15rem}
 .auto-close-head .btn{min-height:38px;padding:8px 14px}
 
-
-/* ===== PREMIUM UI THEME UPGRADE ===== */
-:root{
-  --primary:#0f766e;
-  --secondary:#7c3aed;
-  --accent:#f59e0b;
-  --danger:#ef4444;
-  --bg1:#0b1220;
-  --bg2:#111827;
-  --card:rgba(255,255,255,0.08);
-  --text:#e5e7eb;
-}
-
-body{
-  background: radial-gradient(circle at 10% 10%, #1f2937, #0b1220 40%, #050816 100%) !important;
-  color: var(--text) !important;
-}
-
-.student-card, .rep-card, .att-row, .hifz-item, .menu-item{
-  background: var(--card) !important;
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  border-radius: 18px !important;
-}
-
-.btn{
-  border-radius: 14px !important;
-  font-weight: bold;
-  transition: all .25s ease;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-}
-.btn:hover{transform:translateY(-2px) scale(1.02)}
-
-.btn-primary{background:linear-gradient(135deg,#0f766e,#14b8a6)!important}
-.btn-gold{background:linear-gradient(135deg,#f59e0b,#f97316)!important}
-.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626)!important}
-
-header{
-  background:linear-gradient(90deg,#0f172a,#1e293b)!important;
-  border-bottom:2px solid #14b8a6;
-}
-
-input,select,textarea{
-  background:rgba(255,255,255,0.06)!important;
-  border:1px solid rgba(255,255,255,0.1)!important;
-  color:white!important;
-  border-radius:12px!important;
-}
-
-h1,h2,h3{color:#f8fafc!important}
-
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -477,59 +425,32 @@ const PCSS = [
 function doPrint(html, title) {
   var w = window.open('', '_blank', 'width=820,height=650');
   if (!w) { alert('يرجى السماح بالنوافذ المنبثقة ثم حاول مجدداً'); return; }
-  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '
-/* ===== PREMIUM UI THEME UPGRADE ===== */
-:root{
-  --primary:#0f766e;
-  --secondary:#7c3aed;
-  --accent:#f59e0b;
-  --danger:#ef4444;
-  --bg1:#0b1220;
-  --bg2:#111827;
-  --card:rgba(255,255,255,0.08);
-  --text:#e5e7eb;
-}
+  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html + '
+<script>
+/* ===== PRO HIDE SHEIKHS EXCEPT ASAAD ===== */
+document.addEventListener('DOMContentLoaded', function () {
+  const allowed = ["أسعد", "اسعد", "Asaad"];
 
-body{
-  background: radial-gradient(circle at 10% 10%, #1f2937, #0b1220 40%, #050816 100%) !important;
-  color: var(--text) !important;
-}
+  document.querySelectorAll('*').forEach(el => {
+    try {
+      if (!el || !el.textContent) return;
 
-.student-card, .rep-card, .att-row, .hifz-item, .menu-item{
-  background: var(--card) !important;
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  border-radius: 18px !important;
-}
+      const txt = el.textContent.trim();
 
-.btn{
-  border-radius: 14px !important;
-  font-weight: bold;
-  transition: all .25s ease;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-}
-.btn:hover{transform:translateY(-2px) scale(1.02)}
+      // if contains sheikh label or looks like sheikh name
+      const isSheikh = txt.includes("شيخ") || txt.includes("الشيخ");
 
-.btn-primary{background:linear-gradient(135deg,#0f766e,#14b8a6)!important}
-.btn-gold{background:linear-gradient(135deg,#f59e0b,#f97316)!important}
-.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626)!important}
+      const isAllowed = allowed.some(a => txt.includes(a));
 
-header{
-  background:linear-gradient(90deg,#0f172a,#1e293b)!important;
-  border-bottom:2px solid #14b8a6;
-}
+      if (isSheikh && !isAllowed) {
+        el.style.display = "none";
+      }
+    } catch(e){}
+  });
+});
+</script>
 
-input,select,textarea{
-  background:rgba(255,255,255,0.06)!important;
-  border:1px solid rgba(255,255,255,0.1)!important;
-  color:white!important;
-  border-radius:12px!important;
-}
-
-h1,h2,h3{color:#f8fafc!important}
-
-</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html + '</body></html>';
+</body></html>';
   w.document.write(page);
   w.document.close();
 }
@@ -754,7 +675,7 @@ function renderExpenses(){
 // ═══════════════════════════════════════════
 // الثوابت
 // ═══════════════════════════════════════════
-var GROUPS = ['مجموعة الأشبال'];
+var GROUPS = ['مجموعة أهل القرآن', 'مجموعة الفتية', 'مجموعة الأشبال'];
 var RATINGS = ['ممتاز', 'جيد جداً', 'جيد', 'يحتاج تحسين'];
 var HIDE_GROUPS = ['مجموعة أهل القرآن', 'مجموعة الفتية'];
 var ADAB_OPTS = ['ممتاز', 'جيد جداً', 'جيد', 'سيء', 'غائب'];
@@ -2303,5 +2224,30 @@ startSalatReminder();
   document.addEventListener('DOMContentLoaded',function(){ setTimeout(markReveal,300); });
   var t=setInterval(markReveal,1200);
   setTimeout(function(){clearInterval(t)},12000);
-})();</script></body>
+})();</script>
+<script>
+/* ===== PRO HIDE SHEIKHS EXCEPT ASAAD ===== */
+document.addEventListener('DOMContentLoaded', function () {
+  const allowed = ["أسعد", "اسعد", "Asaad"];
+
+  document.querySelectorAll('*').forEach(el => {
+    try {
+      if (!el || !el.textContent) return;
+
+      const txt = el.textContent.trim();
+
+      // if contains sheikh label or looks like sheikh name
+      const isSheikh = txt.includes("شيخ") || txt.includes("الشيخ");
+
+      const isAllowed = allowed.some(a => txt.includes(a));
+
+      if (isSheikh && !isAllowed) {
+        el.style.display = "none";
+      }
+    } catch(e){}
+  });
+});
+</script>
+
+</body>
 </html>
