@@ -335,11 +335,11 @@ function sbSelect(table, orderCol, orderDesc) {
 </section><!-- اختيار المشرفين بدون تسجيل دخول -->
 <section id="loginScreen" class="container hidden"><div style="max-width:520px;margin:20px auto;background:white;border-radius:16px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.1)"><h2 style="text-align:center;color:var(--primary)">اختيار المشرف</h2><div id="mosqueLabel" style="text-align:center;font-weight:bold;color:var(--sec);margin:10px 0"></div><p style="text-align:center;color:var(--gray);margin-bottom:18px">اختر اسم المشرف للدخول مباشرة</p><button id="supYousefBtn" class="btn btn-primary btn-block hidden" style="margin-bottom:12px" onclick="loginSupervisor('yousef')">الشيخ يوسف أبو خضير</button><button id="supKhalilBtn" class="btn btn-primary btn-block hidden" style="margin-bottom:12px" onclick="loginSupervisor('khalil')">الشيخ خليل الرفاعي</button><button id="supAsaadBtn" class="btn btn-primary btn-block" onclick="loginSupervisor('asaad')">الشيخ أسعد شاهين</button><button class="btn btn-block" style="background:none;color:var(--gray);margin-top:15px" onclick="backToMosqueSelect()">← رجوع لاختيار المسجد</button></div>
 </section><!-- لوحة التحكم -->
-<div id="dashboardArea" class="hidden"><header><div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><h2 id="userNameDisplay"></h2><p id="mosqueNameDisplay"></p></div><button class="btn btn-outline" onclick="logoutConfirm()">خروج</button></div></header><main class="container"><div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap"><button id="adminArchiveBtn"    class="btn btn-gold    hidden" onclick="openArchive()">عرض كافة الكشوفات</button><button id="adminStatsBtn"      class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="adminPrintBtn"      class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="teacherRecordBtn"   class="btn btn-primary hidden" onclick="openAttSheet()">تسجيل كشف اليوم</button><button id="teacherArchiveBtn"  class="btn btn-gold    hidden" onclick="openArchive()">الكشوفات المسجلة</button><button id="teacherStatsBtn"    class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="teacherPrintBtn"    class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="addStdBtn"          class="btn btn-primary hidden" onclick="openStudentModal()">+ إضافة طالب</button><button id="hifzAmmaBtn"        class="btn btn-purple  hidden" onclick="openHifz('عم')"> جزء عم</button><button id="hifzTabarakBtn"     class="btn btn-indigo  hidden" onclick="openHifz('تبارك')"> تبارك</button><button id="adabBtn"            class="btn btn-rose    hidden" onclick="openAdab()"> الآداب والأخلاق</button><button id="qiraahBtn"          class="btn btn-orange  hidden" onclick="openQiraah()"> أحكام التجويد و تصحيح التلاوة</button><button id="statsChartBtn"      class="btn btn-cyan    hidden" onclick="openStatsChart()"> إحصائيات الآداب والأخلاق</button></div><div class="srch"><input type="search" id="globalSearch" placeholder=" ابحث عن طالب..." oninput="applySearch()"></div><div id="adminStats" class="menu-grid hidden"></div><div id="teacherStatCard" class="hidden" style="background:white;border-radius:12px;padding:15px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);display:flex;align-items:center;gap:15px;border-right:4px solid var(--primary)"><div style="font-size:2.5rem;font-weight:bold;color:var(--primary)" id="teacherCount">0</div><div><div style="font-weight:bold;font-size:1rem" id="teacherGroupLabel"></div><div style="color:var(--gray);font-size:.85rem">إجمالي الطلاب في مجموعتك</div></div></div><h3 id="listHeader" style="margin-bottom:15px;color:var(--primary);font-size:1.2rem">قائمة الطلاب</h3><div class="student-grid" id="studentContainer"></div></main>
+<div id="dashboardArea" class="hidden"><header><div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><h2 id="userNameDisplay"></h2><p id="mosqueNameDisplay"></p></div><button class="btn btn-outline" onclick="logoutConfirm()">خروج</button></div></header><main class="container"><div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap"><button id="adminArchiveBtn"    class="btn btn-gold    hidden" onclick="openArchive()">عرض كافة الكشوفات</button><button id="adminStatsBtn"      class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="adminPrintBtn"      class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="teacherRecordBtn"   class="btn btn-primary hidden" onclick="openAttSheet()">تسجيل كشف اليوم</button><button id="teacherArchiveBtn"  class="btn btn-gold    hidden" onclick="openArchive()">الكشوفات المسجلة</button><button id="teacherStatsBtn"    class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="teacherPrintBtn"    class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="addStdBtn"          class="btn btn-primary hidden" onclick="openStudentModal()">+ إضافة طالب</button><button id="hifzAmmaBtn"        class="btn btn-purple  hidden" onclick="openHifz('عم')"> جزء عم</button><button id="hifzTabarakBtn"     class="btn btn-indigo  hidden" onclick="openHifz('تبارك')"> تبارك</button><button id="adabBtn"            class="btn btn-rose    hidden" onclick="openAdab()"> الآداب والأخلاق</button><button id="qiraahBtn"          class="btn btn-orange  hidden" onclick="openQiraah()"> أحكام التجويد و تصحيح التلاوة</button></div><div class="srch"><input type="search" id="globalSearch" placeholder=" ابحث عن طالب..." oninput="applySearch()"></div><div id="adminStats" class="menu-grid hidden"></div><div id="teacherStatCard" class="hidden" style="background:white;border-radius:12px;padding:15px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);display:flex;align-items:center;gap:15px;border-right:4px solid var(--primary)"><div style="font-size:2.5rem;font-weight:bold;color:var(--primary)" id="teacherCount">0</div><div><div style="font-weight:bold;font-size:1rem" id="teacherGroupLabel"></div><div style="color:var(--gray);font-size:.85rem">إجمالي الطلاب في مجموعتك</div></div></div><h3 id="listHeader" style="margin-bottom:15px;color:var(--primary);font-size:1.2rem">قائمة الطلاب</h3><div class="student-grid" id="studentContainer"></div></main>
 </div><!-- Modal: بيانات الطالب -->
-<div id="stdModal" class="modal hidden"><div class="mc" style="max-width:500px"><h2 id="stdModalTitle">بيانات الطالب</h2><form id="stdForm"><input type="hidden" id="editStdId"><label>الاسم الكامل</label><input type="text" id="sName" required><label>الصف</label><input type="text" id="sAge" required placeholder="مثال: الصف الرابع"><label>رقم هاتف ولي الأمر</label><input type="tel" id="sPhone" required><label>المجموعة</label><select id="sGroup"></select><label>الصورة الشخصية</label><input type="file" id="sPhoto" accept="image/*" onchange="encodeImg(this)"><div style="display:flex;gap:10px;margin-top:20px"><button type="submit" class="btn btn-primary" style="flex:1">حفظ البيانات</button><button type="button" class="btn btn-danger" style="flex:1" onclick="closeStdModal()">إلغاء</button></div></form>
+<div id="stdModal" class="modal hidden"><div class="mc" style="max-width:500px"><h2 id="stdModalTitle">بيانات الطالب</h2><form id="stdForm"><input type="hidden" id="editStdId"><label>الاسم الكامل</label><input type="text" id="sName" required><label>الصف</label><input type="text" id="sAge" required placeholder="مثال: الصف الرابع"><label>رقم هاتف ولي الأمر</label><input type="tel" id="sPhone" required><label>ملاحظات</label><textarea id="sNotes" rows="3" required placeholder="اكتب ملاحظات الطالب، أو اكتب: لا يوجد"></textarea><label>الحفظ السابق</label><input type="text" id="sPreviousHifz" required placeholder="مثال: جزء عم، أو لا يوجد"><label>مكان السكن</label><input type="text" id="sResidence" required placeholder="مثال: الزرقاء الجديدة"><label>المجموعة</label><select id="sGroup"></select><label>الصورة الشخصية</label><input type="file" id="sPhoto" accept="image/*" onchange="encodeImg(this)"><div style="display:flex;gap:10px;margin-top:20px"><button type="submit" class="btn btn-primary" style="flex:1">حفظ البيانات</button><button type="button" class="btn btn-danger" style="flex:1" onclick="closeStdModal()">إلغاء</button></div></form>
 </div></div><!-- Modal: كشف الحضور -->
-<div id="attModal" class="modal hidden"><div class="mc"><h2 id="attTitle">تسجيل كشف الحلقات</h2><div class="srch" style="margin-top:12px"><input type="search" id="attSearch" placeholder=" ابحث عن طالب..." oninput="filterAttRows()"></div><div id="attRows" style="margin-top:10px"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-primary" style="flex:1" onclick="saveAtt()">حفظ وتحديث السجلات</button><button class="btn btn-danger" style="flex:1" onclick="closeAttModal()">إلغاء</button></div>
+<div id="attModal" class="modal hidden"><div class="mc"><h2 id="attTitle">تسجيل كشف الحلقات</h2><div style="background:#f8fafc;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-top:12px"><div style="font-weight:bold;color:var(--primary);margin-bottom:8px">حدد اليوم والتاريخ</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><div><label style="margin-top:0">اليوم</label><select id="attDay"><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div><div><label style="margin-top:0">التاريخ</label><input type="date" id="attDate" required onchange="syncAttendanceDay()"></div></div></div><div class="srch" style="margin-top:12px"><input type="search" id="attSearch" placeholder=" ابحث عن طالب..." oninput="filterAttRows()"></div><div id="attRows" style="margin-top:10px"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-primary" style="flex:1" onclick="saveAtt()">حفظ وتحديث السجلات</button><button class="btn btn-danger" style="flex:1" onclick="closeAttModal()">إلغاء</button></div>
 </div></div><!-- Modal: سجل الطالب -->
 <div id="histModal" class="modal hidden"><div class="mc" style="max-width:600px"><h2 id="histTitle" style="color:var(--primary)">سجل المتابعة</h2><div id="histContent" style="margin-top:15px"></div><button class="btn btn-danger btn-block" style="margin-top:20px" onclick="closeHistModal()">إغلاق</button>
 </div></div><!-- Modal: الأرشيف -->
@@ -357,7 +357,7 @@ function sbSelect(table, orderCol, orderDesc) {
 </div></div><!-- Modal: الآداب والأخلاق -->
 <div id="adabModal" class="modal hidden"><div class="mc" style="max-width:700px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> الآداب والأخلاق</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-rose" style="min-height:38px" onclick="openAdabSheet()"> تسجيل كشف</button><button class="btn btn-gold" style="min-height:38px" onclick="openAdabArchive()"> سجلات الآداب</button><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabModal()">إغلاق</button></div></div><div style="text-align:center;padding:40px;color:var(--gray)"><div style="font-size:3rem"></div><p style="margin-top:10px">اختر (تسجيل كشف) لإضافة تقييم جديد<br>أو (سجلات الآداب) لعرض التقييمات السابقة</p></div>
 </div></div><!-- Modal: تسجيل كشف الآداب -->
-<div id="adabSheetModal" class="modal hidden"><div class="mc" style="max-width:700px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> تسجيل كشف الآداب</h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabSheet()">إغلاق</button></div><div id="adabSheetRows"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-rose" style="flex:1" onclick="saveAdabSheet()"> حفظ الكشف</button><button class="btn btn-gold" style="flex:1" onclick="printAdabCurrent()"> طباعة الكل</button></div>
+<div id="adabSheetModal" class="modal hidden"><div class="mc" style="max-width:820px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> تسجيل كشف الآداب والأخلاق</h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabSheet()">إغلاق</button></div><div style="background:#f8fafc;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-weight:bold;color:#e11d48;margin-bottom:8px">حدد اليوم والتاريخ</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><div><label style="margin-top:0">اليوم</label><select id="adabDay"><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div><div><label style="margin-top:0">التاريخ</label><input type="date" id="adabDate" required onchange="syncAdabDay()"></div></div></div><div class="srch"><input type="search" id="adabSearch" placeholder="ابحث عن طالب..." oninput="filterAdabRows()"></div><div id="adabSheetRows"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-rose" style="flex:1" onclick="saveAdabSheet()"> حفظ الكشف</button><button class="btn btn-gold" style="flex:1" onclick="printAdabCurrent()"> طباعة الكل</button></div>
 </div></div><!-- Modal: سجلات الآداب -->
 <div id="adabArchModal" class="modal hidden"><div class="mc" style="max-width:700px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> سجلات الآداب والأخلاق</h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabArch()">إغلاق</button></div><div id="adabArchGrid" class="rep-grid"></div>
 </div></div><!-- Modal: عرض سجل آداب -->
@@ -688,6 +688,30 @@ var curAdabRepId = null;
 function getGroup(s) { return s ? (s.group_name || s.group || '') : ''; }
 function setGroupPayload(p, val) { p.group_name = val; return p; }
 function normalizePhone(v) { return String(v || '').replace(/[^0-9]/g, ''); }
+var STUDENT_DETAILS_PREFIX = '__STUDENT_DETAILS__:';
+function getStudentDetails(s) {
+  var raw = s && s.notes != null ? String(s.notes) : '';
+  if (raw.indexOf(STUDENT_DETAILS_PREFIX) === 0) {
+    try {
+      var parsed = JSON.parse(raw.slice(STUDENT_DETAILS_PREFIX.length));
+      return {
+        notes: String(parsed.notes || ''),
+        previousHifz: String(parsed.previousHifz || ''),
+        residence: String(parsed.residence || '')
+      };
+    } catch (e) {
+      console.warn('تعذر قراءة تفاصيل الطالب المحفوظة', e);
+    }
+  }
+  return {notes:raw, previousHifz:'', residence:''};
+}
+function buildStudentDetails(notes, previousHifz, residence) {
+  return STUDENT_DETAILS_PREFIX + JSON.stringify({
+    notes: String(notes || '').trim(),
+    previousHifz: String(previousHifz || '').trim(),
+    residence: String(residence || '').trim()
+  });
+}
 function getPagesDoneValue(d) {
   if (!d) return 0;
   var n = parseFloat(d.pages_done || d.pagesDone || 0);
@@ -924,9 +948,9 @@ function showDashboard() {
   document.getElementById('userNameDisplay').innerText = dn;
   document.getElementById('mosqueNameDisplay').innerText = getMosqueDisplayName();
   if (db.user.role === 'admin') {
-    ['adminArchiveBtn','adminStatsBtn','adminPrintBtn','addStdBtn','adminStats','adabBtn','statsChartBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
+    ['adminArchiveBtn','adminStatsBtn','adminPrintBtn','addStdBtn','adminStats','adabBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
   } else if (db.user.role === 'teacher') {
-    ['teacherRecordBtn','teacherArchiveBtn','teacherStatsBtn','teacherPrintBtn','addStdBtn','adabBtn','statsChartBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
+    ['teacherRecordBtn','teacherArchiveBtn','teacherStatsBtn','teacherPrintBtn','addStdBtn','adabBtn'].forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.remove('hidden'); });
     var cnt = db.students.filter(function(s) { return s.mosque === db.mosque && getGroup(s) === db.user.group; }).length;
     document.getElementById('teacherCount').innerText = cnt;
     document.getElementById('teacherGroupLabel').innerText = db.user.group;
@@ -976,6 +1000,7 @@ function renderCards(list) {
   list.forEach(function(s) {
     var canM = db.user.role === 'admin' || (db.user.role === 'teacher' && db.user.group === getGroup(s));
     var absN = db.reports.filter(function(r) { return r.mosque === db.mosque && r.students_data && r.students_data[s.id] && r.students_data[s.id].status === 'absent'; }).length;
+    var details = getStudentDetails(s);
     var card = document.createElement('div'); card.className = 'student-card';
     var photo = s.photo || 'https://via.placeholder.com/300x160?text=بدون+صورة';
     var btns = canM
@@ -988,7 +1013,10 @@ function renderCards(list) {
       + '<span class="absbdg ' + absLv(absN) + '">' + (absN > 0 ? 'غياب: ' + absN : 'منتظم') + '</span>'
       + '</div>'
       + '<div style="font-size:.9rem;color:var(--gray);margin-top:4px">الصف: ' + (s.age || '-') + ' | ' + getGroup(s) + '</div>'
-      + '<div style="font-size:.85rem;color:var(--gray)">تواصل: ' + s.phone + '</div>'
+      + '<div style="font-size:.85rem;color:var(--gray)">رقم الهاتف: ' + (s.phone || '-') + '</div>'
+      + '<div style="font-size:.85rem;color:var(--gray)">مكان السكن: ' + (details.residence || '-') + '</div>'
+      + '<div style="font-size:.85rem;color:var(--gray)">الحفظ السابق: ' + (details.previousHifz || '-') + '</div>'
+      + '<div style="font-size:.85rem;color:var(--gray)">ملاحظات: ' + (details.notes || '-') + '</div>'
       + btns + '</div>';
     c.appendChild(card);
   });
@@ -1001,7 +1029,15 @@ function applySearch() {
   if (db.user.role === 'parent') list = db.students.filter(function(s){ return (db.user.children || []).includes(s.id); });
   else if (db.user.role !== 'admin') list = ms.filter(function(s) { return getGroup(s) === db.user.group; });
   else if (currentFilterGroup) list = ms.filter(function(s) { return getGroup(s) === currentFilterGroup; });
-  if (q) list = list.filter(function(s) { return s.name.toLowerCase().includes(q) || (s.phone && s.phone.includes(q)); });
+  if (q) list = list.filter(function(s) {
+    var details = getStudentDetails(s);
+    return (s.name && s.name.toLowerCase().includes(q))
+      || (s.phone && s.phone.toLowerCase().includes(q))
+      || (s.age && String(s.age).toLowerCase().includes(q))
+      || details.notes.toLowerCase().includes(q)
+      || details.previousHifz.toLowerCase().includes(q)
+      || details.residence.toLowerCase().includes(q);
+  });
   renderCards(list);
 }
 
@@ -1018,8 +1054,12 @@ function openStudentModal(id) {
   document.getElementById('stdModalTitle').innerText = id ? 'تعديل طالب' : 'إضافة طالب جديد';
   if (id) {
     var s = db.students.find(function(x) { return x.id == id; }); if (!s) return;
+    var details = getStudentDetails(s);
     document.getElementById('sName').value = s.name; document.getElementById('sAge').value = s.age;
     document.getElementById('sPhone').value = s.phone; document.getElementById('sGroup').value = getGroup(s);
+    document.getElementById('sNotes').value = details.notes;
+    document.getElementById('sPreviousHifz').value = details.previousHifz;
+    document.getElementById('sResidence').value = details.residence;
     db.tempImg = s.photo || '';
   } else { document.getElementById('stdForm').reset(); }
   document.getElementById('stdModal').classList.remove('hidden');
@@ -1053,7 +1093,18 @@ document.getElementById('stdForm').onsubmit = async function(e) {
   e.preventDefault();
   var id = document.getElementById('editStdId').value;
   var uploadedPhoto = db.tempFile ? await uploadStudentPhotoFile(db.tempFile) : null;
-  var p = {mosque:db.mosque, name:document.getElementById('sName').value.trim(), age:document.getElementById('sAge').value.trim(), phone:document.getElementById('sPhone').value.trim(), group_name:document.getElementById('sGroup').value};
+  var p = {
+    mosque:db.mosque,
+    name:document.getElementById('sName').value.trim(),
+    age:document.getElementById('sAge').value.trim(),
+    phone:document.getElementById('sPhone').value.trim(),
+    notes:buildStudentDetails(
+      document.getElementById('sNotes').value,
+      document.getElementById('sPreviousHifz').value,
+      document.getElementById('sResidence').value
+    ),
+    group_name:document.getElementById('sGroup').value
+  };
   if (uploadedPhoto) p.photo = uploadedPhoto;
   else if (!id && db.tempImg) p.photo = db.tempImg;
   showLoad(id ? 'جاري تعديل الطالب...' : 'جاري إضافة الطالب...');
@@ -1096,6 +1147,40 @@ function filterAttRows() {
   });
 }
 
+var ATTENDANCE_DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function localDateISO(date) {
+  var d = date || new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function syncAttendanceDay() {
+  var dateEl = document.getElementById('attDate');
+  var dayEl = document.getElementById('attDay');
+  if (!dateEl || !dayEl || !dateEl.value) return;
+  var d = new Date(dateEl.value + 'T00:00:00');
+  if (!isNaN(d.getTime())) dayEl.value = ATTENDANCE_DAYS[d.getDay()];
+}
+function reportDateToISO(reportDate) {
+  var latin = String(reportDate || '')
+    .replace(/[٠-٩]/g, function(ch) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(ch); })
+    .replace(/[\u200e\u200f]/g, '');
+  var iso = latin.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) return iso[1] + '-' + iso[2].padStart(2, '0') + '-' + iso[3].padStart(2, '0');
+  var local = latin.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (local) return local[3] + '-' + local[2].padStart(2, '0') + '-' + local[1].padStart(2, '0');
+  return '';
+}
+function setAttendanceDateFields(existing) {
+  var dateEl = document.getElementById('attDate');
+  var dayEl = document.getElementById('attDay');
+  var stored = existing && existing.report_date ? String(existing.report_date) : '';
+  dateEl.value = reportDateToISO(stored) || localDateISO(new Date());
+  syncAttendanceDay();
+  if (stored) {
+    var storedDay = ATTENDANCE_DAYS.find(function(day) { return stored.indexOf(day) !== -1; });
+    if (storedDay) dayEl.value = storedDay;
+  }
+}
+
 function openAttSheet(forced, rId) {
   curAttRepId = rId || null;
   curAttGroup = forced || db.user.group;
@@ -1105,6 +1190,7 @@ function openAttSheet(forced, rId) {
   window.attData = {};
   document.getElementById('attSearch').value = '';
   var existing = rId ? db.reports.find(function(r) { return r.id == rId; }) : null;
+  setAttendanceDateFields(existing);
   var exData = existing ? (existing.students_data || {}) : null;
   var showPagesDone = false; // تم حذف خانة كم صفحة أنجز من الكشف اليومي
   document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (' + curAttGroup + ')';
@@ -1195,8 +1281,14 @@ function updateAchPgSum(sid) {
 
 async function saveAtt() {
   var now = new Date();
+  var dateValue = document.getElementById('attDate').value;
+  var dayValue = document.getElementById('attDay').value;
+  if (!dateValue || !dayValue) { alert('يرجى تحديد اليوم والتاريخ'); return; }
+  var selectedDate = new Date(dateValue + 'T00:00:00');
+  if (isNaN(selectedDate.getTime())) { alert('التاريخ المحدد غير صحيح'); return; }
+  var reportDate = dayValue + ' - ' + selectedDate.toLocaleDateString('ar-EG');
   var tname = db.user.role === 'admin' ? 'المدير العام' : hideTeacher(db.user.group) ? curAttGroup : db.user.name;
-  var p = {mosque:db.mosque, group_name:curAttGroup, teacher_name:tname, report_date:now.toLocaleDateString('ar-EG'), report_time:now.toLocaleTimeString('ar-EG'), students_data:JSON.parse(JSON.stringify(window.attData))};
+  var p = {mosque:db.mosque, group_name:curAttGroup, teacher_name:tname, report_date:reportDate, report_time:now.toLocaleTimeString('ar-EG'), students_data:JSON.parse(JSON.stringify(window.attData))};
   showLoad('جاري حفظ الكشف...');
   if (curAttRepId) {
     var r = await dbClient.from('reports').update(p).eq('id', curAttRepId);
@@ -1356,12 +1448,15 @@ function printStudentsList() {
   var n = 1; var rows = '';
   groups.forEach(function(g) {
     var gS = list.filter(function(s) { return getGroup(s) === g; }); if (!gS.length) return;
-    rows += '<tr class="gh"><td colspan="5">' + g + ' — ' + gS.length + ' طلاب</td></tr>';
-    gS.forEach(function(s) { rows += '<tr><td>' + (n++) + '</td><td>' + s.name + '</td><td>' + s.age + '</td><td>' + s.phone + '</td><td>' + getGroup(s) + '</td></tr>'; });
+    rows += '<tr class="gh"><td colspan="8">' + g + ' — ' + gS.length + ' طلاب</td></tr>';
+    gS.forEach(function(s) {
+      var details = getStudentDetails(s);
+      rows += '<tr><td>' + (n++) + '</td><td>' + s.name + '</td><td>' + (s.age || '-') + '</td><td>' + (s.phone || '-') + '</td><td>' + (details.notes || '-') + '</td><td>' + (details.previousHifz || '-') + '</td><td>' + (details.residence || '-') + '</td><td>' + getGroup(s) + '</td></tr>';
+    });
   });
   var now = new Date();
   doPrint('<div class="ph"><h1>دار القرآن الكريم — ' + db.mosque + '</h1><p><b>كشف أسماء الطلاب</b></p><p>التاريخ: ' + now.toLocaleDateString('ar-EG') + ' | إجمالي الطلاب: ' + list.length + '</p></div>'
-    + '<table><thead><tr><th style="width:5%">#</th><th style="width:30%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:25%">رقم ولي الأمر</th><th style="width:30%">المجموعة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<table><thead><tr><th>#</th><th>اسم الطالب</th><th>الصف</th><th>رقم الهاتف</th><th>ملاحظات</th><th>الحفظ السابق</th><th>مكان السكن</th><th>المجموعة</th></tr></thead><tbody>' + rows + '</tbody></table>'
     + '<div class="pf"><span>تاريخ الطباعة: ' + now.toLocaleDateString('ar-EG') + '</span><span>توقيع المشرف العام: ...............................</span></div>',
     'كشف الأسماء');
 }
@@ -1772,33 +1867,95 @@ function closeTilawahArch() { if (confirmExit()) document.getElementById('tilawa
 // ═══════════════════════════════════════════
 function openAdab() { document.getElementById('adabModal').classList.remove('hidden'); }
 function closeAdabModal() { if (confirmExit()) document.getElementById('adabModal').classList.add('hidden'); }
+var ADAB_FIELDS = [
+  {key:'asrIntroduction', label:'المقدمة مع صلاة العصر'},
+  {key:'recitationClass', label:'حصة التسميع'},
+  {key:'activityClass', label:'حصة النشاط'},
+  {key:'cleanliness', label:'النظافة'},
+  {key:'sheikhObedience', label:'طاعة الشيخ'}
+];
+function legacyAdabScore(rating) {
+  return {'ممتاز':10,'جيد جداً':8,'جيد':6,'سيء':3,'غائب':0}[rating] ?? 10;
+}
+function normalizeAdabData(old) {
+  old = old || {};
+  var fallback = legacyAdabScore(old.rating);
+  var result = {};
+  ADAB_FIELDS.forEach(function(field) {
+    var value = parseInt(old[field.key], 10);
+    result[field.key] = isNaN(value) ? fallback : Math.max(0, Math.min(10, value));
+  });
+  return result;
+}
+function adabScoreOptions(selected) {
+  var html = '';
+  for (var i = 10; i >= 0; i--) {
+    html += '<option value="' + i + '"' + (i === selected ? ' selected' : '') + '>' + i + ' من 10</option>';
+  }
+  return html;
+}
+function adabTotal(data) {
+  return ADAB_FIELDS.reduce(function(total, field) { return total + Number(data[field.key] || 0); }, 0);
+}
+function syncAdabDay() {
+  var dateEl = document.getElementById('adabDate');
+  var dayEl = document.getElementById('adabDay');
+  if (!dateEl || !dayEl || !dateEl.value) return;
+  var d = new Date(dateEl.value + 'T00:00:00');
+  if (!isNaN(d.getTime())) dayEl.value = ATTENDANCE_DAYS[d.getDay()];
+}
+function setAdabDateFields(existing) {
+  var stored = existing && existing.report_date ? String(existing.report_date) : '';
+  document.getElementById('adabDate').value = reportDateToISO(stored) || localDateISO(new Date());
+  syncAdabDay();
+  if (stored) {
+    var storedDay = ATTENDANCE_DAYS.find(function(day) { return stored.indexOf(day) !== -1; });
+    if (storedDay) document.getElementById('adabDay').value = storedDay;
+  }
+}
+function filterAdabRows() {
+  var q = document.getElementById('adabSearch').value.trim().toLowerCase();
+  document.querySelectorAll('.adab-row[id^="adabRow_"]').forEach(function(row) {
+    var name = row.getAttribute('data-name') || '';
+    row.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
 function openAdabSheet(editId) {
   curAdabRepId = editId || null;
   window.adabData = {};
   var existing = editId ? db.adabReports.find(function(r){ return r.id == editId; }) : null;
   var exData = existing ? (existing.students_data || {}) : {};
+  setAdabDateFields(existing);
+  document.getElementById('adabSearch').value = '';
   var students = db.students.filter(function(s) { return s.mosque===db.mosque && (db.user.role==='admin'||getGroup(s)===db.user.group|| (existing && getGroup(s)===existing.group_name)); });
   var cont = document.getElementById('adabSheetRows'); cont.innerHTML = '';
   students.forEach(function(s) {
     var old = exData[s.id] || {};
-    window.adabData[s.id] = {rating: old.rating || 'ممتاز'};
+    window.adabData[s.id] = normalizeAdabData(old);
     var row = document.createElement('div'); row.className = 'adab-row';
-    var btns = ADAB_OPTS.map(function(opt, i) {
-      var cls = 'adab-opt' + (window.adabData[s.id].rating===opt ? ' ' + ADAB_CLS[i] : '');
-      return '<button type="button" class="'+cls+'" id="adOpt_'+s.id+'_'+i+'" onclick="selectAdab('+s.id+','+i+')">'+opt+'</button>';
+    row.id = 'adabRow_' + s.id;
+    row.setAttribute('data-name', String(s.name || '').toLowerCase());
+    var fields = ADAB_FIELDS.map(function(field) {
+      return '<div><label style="margin-top:0">' + field.label + '</label>'
+        + '<select onchange="window.adabData[' + s.id + '].' + field.key + '=parseInt(this.value,10)">'
+        + adabScoreOptions(window.adabData[s.id][field.key]) + '</select></div>';
     }).join('');
-    row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div><div class="adab-btns">'+btns+'</div>';
+    row.innerHTML = '<div class="adab-name" style="margin-bottom:10px">' + s.name
+      + '<div style="font-size:.78rem;color:var(--gray)">' + getGroup(s) + '</div></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px">' + fields + '</div>';
     cont.appendChild(row);
   });
   document.getElementById('adabSheetModal').classList.remove('hidden');
 }
-function selectAdab(sid, idx) {
-  window.adabData[sid] = {rating: ADAB_OPTS[idx]};
-  ADAB_OPTS.forEach(function(_, i) { var el=document.getElementById('adOpt_'+sid+'_'+i); if(el) el.className='adab-opt'+(i===idx?' '+ADAB_CLS[idx]:''); });
-}
 async function saveAdabSheet() {
   var now=new Date();
-  var payload={mosque:db.mosque,group_name:db.user.role==='admin'?'كل المجموعات':db.user.group,teacher_name:db.user.role==='admin'?'المدير العام':db.user.name,report_date:now.toLocaleDateString('ar-EG'),report_time:now.toLocaleTimeString('ar-EG'),students_data:JSON.parse(JSON.stringify(window.adabData))};
+  var dateValue=document.getElementById('adabDate').value;
+  var dayValue=document.getElementById('adabDay').value;
+  if(!dateValue||!dayValue){alert('يرجى تحديد اليوم والتاريخ');return;}
+  var selectedDate=new Date(dateValue+'T00:00:00');
+  if(isNaN(selectedDate.getTime())){alert('التاريخ المحدد غير صحيح');return;}
+  var reportDate=dayValue+' - '+selectedDate.toLocaleDateString('ar-EG');
+  var payload={mosque:db.mosque,group_name:db.user.role==='admin'?'كل المجموعات':db.user.group,teacher_name:db.user.role==='admin'?'المدير العام':db.user.name,report_date:reportDate,report_time:now.toLocaleTimeString('ar-EG'),students_data:JSON.parse(JSON.stringify(window.adabData))};
   showLoad(curAdabRepId ? 'جاري تعديل كشف الآداب...' : 'جاري حفظ كشف الآداب...');
   if(curAdabRepId){
     var r=await dbClient.from('adab_reports').update(payload).eq('id',curAdabRepId);
@@ -1818,11 +1975,11 @@ function closeAdabSheet() { if (confirmExit()) document.getElementById('adabShee
 function printAdabCurrent() {
   var students=db.students.filter(function(s){return s.mosque===db.mosque&&(db.user.role==='admin'||getGroup(s)===db.user.group);});
   var rows='';
-  students.forEach(function(s,i){var d=window.adabData[s.id];var rating=d?d.rating:'ممتاز';var bg=ADAB_COLORS[rating]||'#fff';rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;font-weight:bold;background:'+bg+'">'+rating+'</td></tr>';});
-  var now=new Date();
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> كشف الآداب والأخلاق</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div>'
-    +'<table><thead><tr><th style="width:5%">#</th><th style="width:35%">اسم الطالب</th><th style="width:30%">المجموعة</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
+  students.forEach(function(s,i){var d=normalizeAdabData(window.adabData[s.id]);rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+d[field.key]+'/10</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
+  var dateValue=document.getElementById('adabDate').value;var dayValue=document.getElementById('adabDay').value;var selectedDate=dateValue?new Date(dateValue+'T00:00:00'):new Date();var reportDate=dayValue+' - '+selectedDate.toLocaleDateString('ar-EG');
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> كشف الآداب والأخلاق</b></p><p>اليوم والتاريخ: '+reportDate+'</p></div>'
+    +'<table><thead><tr><th>#</th><th>اسم الطالب</th>'+ADAB_FIELDS.map(function(field){return '<th>'+field.label+'</th>';}).join('')+'<th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+reportDate+'</span></div>',
     'كشف الآداب والأخلاق');
 }
 function openAdabArchive() {
@@ -1841,7 +1998,14 @@ function viewAdabRep(id) {
   activeAdabViewId=id; var r=db.adabReports.find(function(x){return x.id==id;});if(!r)return;
   document.getElementById('adabViewTitle').innerText='كشف الآداب — '+r.group_name+' ('+r.report_date+')';
   var html='';
-  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#f8fafc';html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:'+bg+'"><span style="font-weight:bold;font-size:15px">'+(s?s.name:'محذوف')+'</span><span style="font-weight:bold;font-size:15px">'+d.rating+'</span></div>';});
+  Object.entries(r.students_data||{}).forEach(function(entry){
+    var sid=entry[0];var d=normalizeAdabData(entry[1]);var s=db.students.find(function(x){return x.id==sid;});
+    html+='<div style="padding:12px;border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px;background:#f8fafc">'
+      +'<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span style="font-weight:bold;font-size:15px">'+(s?s.name:'محذوف')+'</span><span style="font-weight:bold;color:#e11d48">المجموع: '+adabTotal(d)+'/50</span></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px">'
+      +ADAB_FIELDS.map(function(field){return '<div style="font-size:.85rem"><b>'+field.label+':</b> '+d[field.key]+'/10</div>';}).join('')
+      +'</div></div>';
+  });
   document.getElementById('adabViewContent').innerHTML=html||'<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات</p>';
   document.getElementById('adabViewModal').classList.remove('hidden');
 }
@@ -1849,9 +2013,9 @@ function closeAdabView() { if (confirmExit()) document.getElementById('adabViewM
 function printAdabView() {
   var r=db.adabReports.find(function(x){return x.id==activeAdabViewId;});if(!r)return;
   var rows='';var i=0;
-  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#fff';i++;rows+='<tr><td style="text-align:center">'+i+'</td><td style="font-weight:bold;font-size:15px">'+(s?s.name:'محذوف')+'</td><td style="text-align:center;font-weight:bold;background:'+bg+'">'+d.rating+'</td></tr>';});
+  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=normalizeAdabData(entry[1]);var s=db.students.find(function(x){return x.id==sid;});i++;rows+='<tr><td style="text-align:center">'+i+'</td><td style="font-weight:bold">'+(s?s.name:'محذوف')+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+d[field.key]+'/10</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+r.mosque+'</h1><p><b> كشف الآداب — '+r.group_name+'</b></p><p>التاريخ: '+r.report_date+' | المعلم: '+r.teacher_name+'</p></div>'
-    +'<table><thead><tr><th style="width:5%">#</th><th style="width:65%">اسم الطالب</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<table><thead><tr><th>#</th><th>اسم الطالب</th>'+ADAB_FIELDS.map(function(field){return '<th>'+field.label+'</th>';}).join('')+'<th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+r.report_date+'</span></div>',
     'كشف الآداب');
 }
