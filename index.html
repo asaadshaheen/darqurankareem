@@ -276,14 +276,14 @@ var dbClient={
       update:function(data){
         return {
           eq:function(col,val){
-            return fetch(base+'?${col}=eq.'+encodeURIComponent(val),{method:'PATCH',headers:SB_HEADERS,body:JSON.stringify(data)}).then(function(res){return res.ok?{error:null}:{error:{message:'Update failed '+res.status}};});
+            return fetch(base+'?'+col+'=eq.'+encodeURIComponent(val),{method:'PATCH',headers:SB_HEADERS,body:JSON.stringify(data)}).then(function(res){return res.ok?{error:null}:{error:{message:'Update failed '+res.status}};});
           }
         };
       },
       delete:function(){
         return {
           eq:function(col,val){
-            return fetch(base+'?${col}=eq.'+encodeURIComponent(val),{method:'DELETE',headers:SB_HEADERS}).then(function(res){return res.ok?{error:null}:{error:{message:'Delete failed '+res.status}};});
+            return fetch(base+'?'+col+'=eq.'+encodeURIComponent(val),{method:'DELETE',headers:SB_HEADERS}).then(function(res){return res.ok?{error:null}:{error:{message:'Delete failed '+res.status}};});
           }
         };
       },
@@ -306,7 +306,7 @@ function sbSelect(table, orderCol, orderDesc) {
     selectCols = 'id,name,age,phone,photo,notes,mosque,group_name';
   }
 
-  var q = SB_URL + '/rest/v1/${table}?select=' + selectCols;
+  var q = SB_URL + '/rest/v1/' + table + '?select=' + selectCols;
 
   if (orderCol) {
     q += '&order=' + orderCol + (orderDesc ? '.desc' : '.asc');
@@ -333,7 +333,7 @@ function sbSelect(table, orderCol, orderDesc) {
 </section><!-- اختيار المسجد بعد اختيار الفصل -->
 <section id="mosqueScreen" class="container hidden"><div style="text-align:center;margin-top:40px"><h1 id="mosqueScreenTitle" style="color:var(--primary);font-size:1.8rem">اختيار المسجد</h1><p id="mosqueScreenSub" style="color:var(--gray);margin-top:10px">يرجى اختيار المسجد للمتابعة</p></div><div style="max-width:500px;margin:30px auto 0"><button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد طارق بن زياد الكبير')">مسجد طارق بن زياد الكبير</button><button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد الحاجة مريم')">مسجد الحاجة مريم</button><button class="btn btn-primary btn-block" style="margin-bottom:15px" onclick="setMosque('مسجد ابو عيشة')">مسجد ابو عيشة</button><button class="btn btn-block" style="background:none;color:var(--gray);margin-top:10px" onclick="backToTermSelect()">← رجوع لاختيار الفصل</button></div>
 </section><!-- اختيار المشرفين بدون تسجيل دخول -->
-<section id="loginScreen" class="container hidden"><div style="max-width:520px;margin:20px auto;background:white;border-radius:16px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.1)"><h2 style="text-align:center;color:var(--primary)">اختيار المشرف</h2><div id="mosqueLabel" style="text-align:center;font-weight:bold;color:var(--sec);margin:10px 0"></div><p style="text-align:center;color:var(--gray);margin-bottom:18px">اختر اسم المشرف للدخول مباشرة</p><button id="supYousefBtn" class="btn btn-primary btn-block" style="margin-bottom:12px" onclick="loginSupervisor('yousef')">الشيخ يوسف أبو خضير</button><button id="supKhalilBtn" class="btn btn-primary btn-block" style="margin-bottom:12px" onclick="loginSupervisor('khalil')">الشيخ خليل الرفاعي</button><button id="supAsaadBtn" class="btn btn-primary btn-block" onclick="loginSupervisor('asaad')">الشيخ أسعد شاهين</button><button class="btn btn-block" style="background:none;color:var(--gray);margin-top:15px" onclick="backToMosqueSelect()">← رجوع لاختيار المسجد</button></div>
+<section id="loginScreen" class="container hidden"><div style="max-width:520px;margin:20px auto;background:white;border-radius:16px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.1)"><h2 style="text-align:center;color:var(--primary)">اختيار المشرف</h2><div id="mosqueLabel" style="text-align:center;font-weight:bold;color:var(--sec);margin:10px 0"></div><p style="text-align:center;color:var(--gray);margin-bottom:18px">اختر اسم المشرف للدخول مباشرة</p><button id="supYousefBtn" class="btn btn-primary btn-block hidden" style="margin-bottom:12px" onclick="loginSupervisor('yousef')">الشيخ يوسف أبو خضير</button><button id="supKhalilBtn" class="btn btn-primary btn-block hidden" style="margin-bottom:12px" onclick="loginSupervisor('khalil')">الشيخ خليل الرفاعي</button><button id="supAsaadBtn" class="btn btn-primary btn-block" onclick="loginSupervisor('asaad')">الشيخ أسعد شاهين</button><button class="btn btn-block" style="background:none;color:var(--gray);margin-top:15px" onclick="backToMosqueSelect()">← رجوع لاختيار المسجد</button></div>
 </section><!-- لوحة التحكم -->
 <div id="dashboardArea" class="hidden"><header><div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><h2 id="userNameDisplay"></h2><p id="mosqueNameDisplay"></p></div><button class="btn btn-outline" onclick="logoutConfirm()">خروج</button></div></header><main class="container"><div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap"><button id="adminArchiveBtn"    class="btn btn-gold    hidden" onclick="openArchive()">عرض كافة الكشوفات</button><button id="adminStatsBtn"      class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="adminPrintBtn"      class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="teacherRecordBtn"   class="btn btn-primary hidden" onclick="openAttSheet()">تسجيل كشف اليوم</button><button id="teacherArchiveBtn"  class="btn btn-gold    hidden" onclick="openArchive()">الكشوفات المسجلة</button><button id="teacherStatsBtn"    class="btn btn-info    hidden" onclick="openAbsenceStats()"> إحصائيات الغياب</button><button id="teacherPrintBtn"    class="btn btn-teal    hidden" onclick="printStudentsList()"> طباعة أسماء الطلاب</button><button id="addStdBtn"          class="btn btn-primary hidden" onclick="openStudentModal()">+ إضافة طالب</button><button id="hifzAmmaBtn"        class="btn btn-purple  hidden" onclick="openHifz('عم')"> جزء عم</button><button id="hifzTabarakBtn"     class="btn btn-indigo  hidden" onclick="openHifz('تبارك')"> تبارك</button><button id="adabBtn"            class="btn btn-rose    hidden" onclick="openAdab()"> الآداب والأخلاق</button><button id="qiraahBtn"          class="btn btn-orange  hidden" onclick="openQiraah()"> أحكام التجويد و تصحيح التلاوة</button><button id="statsChartBtn"      class="btn btn-cyan    hidden" onclick="openStatsChart()"> إحصائيات الآداب والأخلاق</button></div><div class="srch"><input type="search" id="globalSearch" placeholder=" ابحث عن طالب..." oninput="applySearch()"></div><div id="adminStats" class="menu-grid hidden"></div><div id="teacherStatCard" class="hidden" style="background:white;border-radius:12px;padding:15px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);display:flex;align-items:center;gap:15px;border-right:4px solid var(--primary)"><div style="font-size:2.5rem;font-weight:bold;color:var(--primary)" id="teacherCount">0</div><div><div style="font-weight:bold;font-size:1rem" id="teacherGroupLabel"></div><div style="color:var(--gray);font-size:.85rem">إجمالي الطلاب في مجموعتك</div></div></div><h3 id="listHeader" style="margin-bottom:15px;color:var(--primary);font-size:1.2rem">قائمة الطلاب</h3><div class="student-grid" id="studentContainer"></div></main>
 </div><!-- Modal: بيانات الطالب -->
@@ -425,30 +425,7 @@ const PCSS = [
 function doPrint(html, title) {
   var w = window.open('', '_blank', 'width=820,height=650');
   if (!w) { alert('يرجى السماح بالنوافذ المنبثقة ثم حاول مجدداً'); return; }
-  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>${(title || 'طباعة')}</title><style>${PCSS}\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}${'</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  const allowedKeywords = ["أسعد", "Asaad", "شاهين", "Shaheen"];
-
-  document.querySelectorAll('*').forEach(function(el){
-    try {
-      const text = (el.textContent || "").trim();
-      if (!text) return;
-
-      const isSheikh = text.includes("شيخ") || text.includes("الشيخ");
-      const allowed = allowedKeywords.some(k => text.includes(k));
-
-      if (isSheikh && !allowed) {
-        el.style.display = "none";
-      }
-    } catch(e){}
-  });
-
-});
-</script>
-
-</body></html>';
+  var page = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>' + (title || 'طباعة') + '</title><style>' + PCSS + '\n.top-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #ddd}.back-btn,.print-btn{color:white;border:none;padding:9px 18px;border-radius:10px;font-weight:bold;cursor:pointer}.back-btn{background:#be123c}.print-btn{background:#059669}@media print{.top-bar{display:none!important}}' + '</style></head><body><div class="top-bar"><button class="back-btn" onclick="window.close()">رجوع</button><button class="print-btn" onclick="window.print()">طباعة</button></div>' + html + '</body></html>';
   w.document.write(page);
   w.document.close();
 }
@@ -482,13 +459,13 @@ async function loadExpenseState(){
   expenseState = {total:0, items:[]};
   var scope = getExpenseScope();
   try{
-    var bRes = await fetch(SB_URL + '/rest/v1/expense_budgets?select=scope,total_amount&scope=eq.${encodeURIComponent(scope)}&limit=1', {
+    var bRes = await fetch(SB_URL + '/rest/v1/expense_budgets?select=scope,total_amount&scope=eq.' + encodeURIComponent(scope) + '&limit=1', {
       method:'GET', headers: expenseHeaders()
     });
     var bData = await bRes.json();
     if (bRes.ok && bData && bData.length) expenseState.total = parseFloat(bData[0].total_amount || 0) || 0;
 
-    var eRes = await fetch(SB_URL + '/rest/v1/expenses?select=*&scope=eq.${encodeURIComponent(scope)}&order=created_at.desc', {
+    var eRes = await fetch(SB_URL + '/rest/v1/expenses?select=*&scope=eq.' + encodeURIComponent(scope) + '&order=created_at.desc', {
       method:'GET', headers: expenseHeaders()
     });
     var eData = await eRes.json();
@@ -657,7 +634,14 @@ function renderExpenses(){
     return;
   }
   list.innerHTML = expenseState.items.map(function(it){
-    return '<div class="expense-row">${'<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'}<b>${(it.item_name || '-')}</b>${'<span class="expense-cost" style="color:' + ((parseFloat(it.amount)||0)<0?'#166534':'var(--danger)')}">${(((parseFloat(it.amount)||0)<0?'}:'-')) + formatMoney(Math.abs(parseFloat(it.amount)||0)) + ' د.أ</span>${'</div>'}<div class="expense-meta">التاريخ: ${(it.expense_date || '-')} | الوقت: ${(it.expense_time || '-')}</div>${'<div class="expense-meta">المتبقي بعد العملية: ' + formatMoney(it.total_after)} د.أ</div>${'<button class="btn btn-danger" style="min-height:34px;padding:6px 12px;margin-top:8px;font-size:.8rem" onclick="deleteExpenseItem(' + it.id})">حذف</button>'
+    return '<div class="expense-row">'
+      + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      + '<b>' + (it.item_name || '-') + '</b>'
+      + '<span class="expense-cost" style="color:' + ((parseFloat(it.amount)||0)<0?'#166534':'var(--danger)') + '">' + (((parseFloat(it.amount)||0)<0?'+':'-')) + formatMoney(Math.abs(parseFloat(it.amount)||0)) + ' د.أ</span>'
+      + '</div>'
+      + '<div class="expense-meta">التاريخ: ' + (it.expense_date || '-') + ' | الوقت: ' + (it.expense_time || '-') + '</div>'
+      + '<div class="expense-meta">المتبقي بعد العملية: ' + formatMoney(it.total_after) + ' د.أ</div>'
+      + '<button class="btn btn-danger" style="min-height:34px;padding:6px 12px;margin-top:8px;font-size:.8rem" onclick="deleteExpenseItem(' + it.id + ')">حذف</button>'
       + '</div>';
   }).join('');
 }
@@ -851,12 +835,11 @@ function isAbuAishaMosque() {
 }
 
 function renderSupervisorOptions() {
-  var onlyAsaad = isAbuAishaMosque();
   var y = document.getElementById('supYousefBtn');
   var k = document.getElementById('supKhalilBtn');
   var a = document.getElementById('supAsaadBtn');
-  if (y) y.classList.toggle('hidden', onlyAsaad);
-  if (k) k.classList.toggle('hidden', onlyAsaad);
+  if (y) y.classList.add('hidden');
+  if (k) k.classList.add('hidden');
   if (a) a.classList.remove('hidden');
   var note = document.getElementById('supervisorNote');
   if (!note) {
@@ -866,7 +849,7 @@ function renderSupervisorOptions() {
     var box = document.getElementById('mosqueLabel');
     if (box && box.parentNode) box.parentNode.insertBefore(note, box.nextSibling);
   }
-  note.innerText = onlyAsaad ? 'هذا المسجد مخصص للشيخ أسعد شاهين' : 'اختر اسم المشرف للدخول مباشرة';
+  note.innerText = 'الدخول متاح للشيخ أسعد شاهين';
 }
 
 function setMosque(m) {
@@ -889,7 +872,7 @@ function backToMosqueSelect() {
   document.getElementById('mosqueScreen').classList.remove('hidden');
 }
 function loginSupervisor(username) {
-  if (isAbuAishaMosque() && username !== 'asaad') { alert('مسجد ابو عيشة مخصص للشيخ أسعد شاهين فقط'); return; }
+  if (username !== 'asaad') { alert('الدخول متاح للشيخ أسعد شاهين فقط'); return; }
   var acc = ACCOUNTS.find(function(x){ return x.username === username || x.user === username; });
   if (!acc) { alert('لم يتم العثور على المشرف'); return; }
   db.user = acc;
@@ -964,10 +947,10 @@ function refreshDash(fg) {
   var ms = db.students.filter(function(s) { return s.mosque === db.mosque; });
   if (db.user.role === 'admin') {
     var st = document.getElementById('adminStats');
-    st.innerHTML = '<div class="menu-item" onclick="refreshDash()"><span>الكل</span><span class="badge">${ms.length}</span></div>';
+    st.innerHTML = '<div class="menu-item" onclick="refreshDash()"><span>الكل</span><span class="badge">' + ms.length + '</span></div>';
     GROUPS.forEach(function(g) {
       var c = ms.filter(function(s) { return getGroup(s) === g; }).length;
-      st.innerHTML += '<div class="menu-item" onclick="refreshDash(\'${g}\')"><span style="font-size:.82rem;text-align:center">${g}</span><span class="badge">${c}</span></div>';
+      st.innerHTML += '<div class="menu-item" onclick="refreshDash(\'' + g + '\')"><span style="font-size:.82rem;text-align:center">' + g + '</span><span class="badge">' + c + '</span></div>';
     });
   }
   var list = ms;
@@ -996,9 +979,17 @@ function renderCards(list) {
     var card = document.createElement('div'); card.className = 'student-card';
     var photo = s.photo || 'https://via.placeholder.com/300x160?text=بدون+صورة';
     var btns = canM
-      ? '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" style="flex:1" onclick="openStudentModal(${s.id})">تعديل</button><button class="btn btn-danger" style="flex:1" onclick="deleteStudent(${s.id})">حذف</button></div>'
-      : '<button class="btn btn-gold btn-block" style="margin-top:10px" onclick="showHistory(${s.id})">عرض السجل</button>';
-    card.innerHTML = '<img src="${photo}" class="student-img" onclick="openPhotoViewer(${s.id})">${'<div class="student-body">'}<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px">${'<div style="font-weight:bold;font-size:1.1rem;color:var(--primary)">' + s.name}</div>${'<span class="absbdg ' + absLv(absN)}">${(absN > 0 ? 'غياب: ' + absN : 'منتظم')}</span>${'</div>'}<div style="font-size:.9rem;color:var(--gray);margin-top:4px">الصف: ${(s.age || '-')} | ${getGroup(s)}</div>${'<div style="font-size:.85rem;color:var(--gray)">تواصل: ' + s.phone}</div>${btns}</div>';
+      ? '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-primary" style="flex:1" onclick="openStudentModal(' + s.id + ')">تعديل</button><button class="btn btn-danger" style="flex:1" onclick="deleteStudent(' + s.id + ')">حذف</button></div>'
+      : '<button class="btn btn-gold btn-block" style="margin-top:10px" onclick="showHistory(' + s.id + ')">عرض السجل</button>';
+    card.innerHTML = '<img src="' + photo + '" class="student-img" onclick="openPhotoViewer(' + s.id + ')">'
+      + '<div class="student-body">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px">'
+      + '<div style="font-weight:bold;font-size:1.1rem;color:var(--primary)">' + s.name + '</div>'
+      + '<span class="absbdg ' + absLv(absN) + '">' + (absN > 0 ? 'غياب: ' + absN : 'منتظم') + '</span>'
+      + '</div>'
+      + '<div style="font-size:.9rem;color:var(--gray);margin-top:4px">الصف: ' + (s.age || '-') + ' | ' + getGroup(s) + '</div>'
+      + '<div style="font-size:.85rem;color:var(--gray)">تواصل: ' + s.phone + '</div>'
+      + btns + '</div>';
     c.appendChild(card);
   });
 }
@@ -1022,7 +1013,7 @@ function closePhotoViewer() { document.getElementById('photoViewer').classList.a
 // ═══════════════════════════════════════════
 function openStudentModal(id) {
   var sel = document.getElementById('sGroup');
-  sel.innerHTML = GROUPS.filter(function(g) { return db.user.role === 'admin' || g === db.user.group; }).map(function(g) { return '<option value=\"${g || ''}\">${g}</option>'; }).join('');
+  sel.innerHTML = GROUPS.filter(function(g) { return db.user.role === 'admin' || g === db.user.group; }).map(function(g) { return '<option value="' + g + '">' + g + '</option>'; }).join('');
   db.tempImg = ''; db.tempFile = null; document.getElementById('sPhoto').value=''; document.getElementById('editStdId').value = id || '';
   document.getElementById('stdModalTitle').innerText = id ? 'تعديل طالب' : 'إضافة طالب جديد';
   if (id) {
@@ -1116,7 +1107,7 @@ function openAttSheet(forced, rId) {
   var existing = rId ? db.reports.find(function(r) { return r.id == rId; }) : null;
   var exData = existing ? (existing.students_data || {}) : null;
   var showPagesDone = false; // تم حذف خانة كم صفحة أنجز من الكشف اليومي
-  document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (${curAttGroup})';
+  document.getElementById('attTitle').innerText = rId ? 'تعديل الكشف' : 'تسجيل الكشف (' + curAttGroup + ')';
 
   students.forEach(function(s) {
     var defVal = {status:'present', today:'', pages_done:'', rating:'ممتاز', required:''};
@@ -1124,11 +1115,26 @@ function openAttSheet(forced, rId) {
     if (val.pages_done === undefined || val.pages_done === null) val.pages_done = '';
 
     var pagesHTML = showPagesDone
-      ? '<label>كم صفحة أنجز:</label><input type="number" min="0" step="0.5" value=\"${(val.pages_done || '') || ''}\" placeholder="مثال: 2" oninput="window.attData[${s.id}].pages_done=this.value">'
+      ? '<label>كم صفحة أنجز:</label><input type="number" min="0" step="0.5" value="' + (val.pages_done || '') + '" placeholder="مثال: 2" oninput="window.attData[' + s.id + '].pages_done=this.value">'
       : '';
 
-    var attHTML = '<div class="att-row" id="attRow_${s.id}">${'<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'}<b>${s.name}</b>${'<select class="att-sel" style="min-width:130px;margin:0" onchange="window.attData[' + s.id}].status=this.value;updateAttRow(${s.id})">${'<option value="present"' + (val.status === 'present' ? ' selected' : '')}>حاضر</option>${'<option value="absent"' + (val.status === 'absent' ? ' selected' : '')}>غائب</option>${'<option value="absent_excused"' + (val.status === 'absent_excused' ? ' selected' : '')}>غائب بعذر</option>${'</select></div>'}<div class="hide-absent">${'<label>التسميع:</label><input type="text" value=\"${(val.today || '') || ''}\" placeholder="مثال: سورة النبأ 1-10" oninput="window.attData[' + s.id}].today=this.value">${'<label>التقييم:</label>'}<select onchange="window.attData[${s.id}].rating=this.value">${RATINGS.map(function(r) { return '<option value=\"${r || ''}\"' + (val.rating === r ? ' selected' : '')}>${r}</option>'; }).join('') +
-      '</select>${'<label>المطلوب للمرة القادمة:</label><input type="text" value=\"${(val.required || '') || ''}\" placeholder="مثال: النازعات 1-10" oninput="window.attData[' + s.id}].required=this.value">${pagesHTML}</div></div>';
+    var attHTML = '<div class="att-row" id="attRow_' + s.id + '">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">' +
+      '<b>' + s.name + '</b>' +
+      '<select class="att-sel" style="min-width:130px;margin:0" onchange="window.attData[' + s.id + '].status=this.value;updateAttRow(' + s.id + ')">' +
+      '<option value="present"' + (val.status === 'present' ? ' selected' : '') + '>حاضر</option>' +
+      '<option value="absent"' + (val.status === 'absent' ? ' selected' : '') + '>غائب</option>' +
+      '<option value="absent_excused"' + (val.status === 'absent_excused' ? ' selected' : '') + '>غائب بعذر</option>' +
+      '</select></div>' +
+      '<div class="hide-absent">' +
+      '<label>التسميع:</label><input type="text" value="' + (val.today || '') + '" placeholder="مثال: سورة النبأ 1-10" oninput="window.attData[' + s.id + '].today=this.value">' +
+      '<label>التقييم:</label>' +
+      '<select onchange="window.attData[' + s.id + '].rating=this.value">' +
+      RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+      '</select>' +
+      '<label>المطلوب للمرة القادمة:</label><input type="text" value="' + (val.required || '') + '" placeholder="مثال: النازعات 1-10" oninput="window.attData[' + s.id + '].required=this.value">' +
+      pagesHTML +
+      '</div></div>';
 
     cont.innerHTML += attHTML;
     window.attData[s.id] = {
@@ -1183,7 +1189,7 @@ function updateAchPg(sid) {
 function updateAchPgSum(sid) {
   var el = document.getElementById('achPgSum_' + sid); if (!el) return;
   var d = window.attData[sid];
-  if (d && d.achievePages && d.achievePages.length > 0) el.innerText = 'من صفحة ${d.achieveFrom} إلى ${d.achieveTo} (${d.achievePages.length} صفحة)';
+  if (d && d.achievePages && d.achievePages.length > 0) el.innerText = 'من صفحة ' + d.achieveFrom + ' إلى ' + d.achieveTo + ' (' + d.achievePages.length + ' صفحة)';
   else el.innerText = '';
 }
 
@@ -1220,13 +1226,16 @@ function showHistory(id) {
     var sl = h.status === 'present' ? 'حاضر' : h.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
     var extra = '';
     if (h.status === 'present') {
-      extra = '<p style="font-size:.85rem;margin-top:5px"><b>التسميع:</b> ${(h.today||'-')}</p>${'<p style="font-size:.85rem"><b>التقييم:</b> ' + (h.rating||'-')}</p>${'<p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ' + (h.required||'-')}</p>${((h.pages_done !== undefined && h.pages_done !== null && h.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + h.pages_done}</p>' : '');
-      if (h.revision && h.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ${h.revision.join('، ')}</p>';
-      if (h.achieveJuz && h.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء المحفوظة:</b> ${h.achieveJuz.join('، ')}</p>';
-      if (h.achievePages && h.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص${h.achieveFrom} → ص${h.achieveTo} (${h.achievePages.length} صفحة)</p>';
+      extra = '<p style="font-size:.85rem;margin-top:5px"><b>التسميع:</b> ' + (h.today||'-') + '</p>'
+        + '<p style="font-size:.85rem"><b>التقييم:</b> ' + (h.rating||'-') + '</p>'
+        + '<p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ' + (h.required||'-') + '</p>'
+        + ((h.pages_done !== undefined && h.pages_done !== null && h.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + h.pages_done + '</p>' : '');
+      if (h.revision && h.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + h.revision.join('، ') + '</p>';
+      if (h.achieveJuz && h.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء المحفوظة:</b> ' + h.achieveJuz.join('، ') + '</p>';
+      if (h.achievePages && h.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + h.achieveFrom + ' → ص' + h.achieveTo + ' (' + h.achievePages.length + ' صفحة)</p>';
     }
     var div = document.createElement('div'); div.className = 'hist-item';
-    div.innerHTML = '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px"><span class="hist-date">${r.report_date}</span><span class="sp ${h.status}">${sl}</span></div>' + extra;
+    div.innerHTML = '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px"><span class="hist-date">' + r.report_date + '</span><span class="sp ' + h.status + '">' + sl + '</span></div>' + extra;
     list.appendChild(div);
   });
   document.getElementById('histModal').classList.remove('hidden');
@@ -1252,7 +1261,13 @@ function renderArchGrid(reps) {
   if (!reps.length) { grid.innerHTML = '<p style="color:var(--gray);padding:20px;text-align:center">لا توجد كشوفات</p>'; return; }
   reps.forEach(function(r) {
     var card = document.createElement('div'); card.className = 'rep-card';
-    card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:var(--primary)">${r.group_name}</b><small>${r.report_date}</small></div>${'<p style="font-size:.8rem">بإشراف: ' + r.teacher_name}</p>${'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'}<button class="btn btn-primary" style="flex:1" onclick="viewReport(${r.id})">عرض</button>${'<button class="btn btn-info" style="flex:1" onclick="editAttendanceReport(' + r.id})">تعديل</button>${'<button class="btn btn-gold" style="flex:1" onclick="printRepById(' + r.id})">طباعة</button>${'<button class="btn btn-danger" style="flex:1" onclick="deleteReport(' + r.id})">حذف</button>'
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:var(--primary)">' + r.group_name + '</b><small>' + r.report_date + '</small></div>'
+      + '<p style="font-size:.8rem">بإشراف: ' + r.teacher_name + '</p>'
+      + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+      + '<button class="btn btn-primary" style="flex:1" onclick="viewReport(' + r.id + ')">عرض</button>'
+      + '<button class="btn btn-info" style="flex:1" onclick="editAttendanceReport(' + r.id + ')">تعديل</button>'
+      + '<button class="btn btn-gold" style="flex:1" onclick="printRepById(' + r.id + ')">طباعة</button>'
+      + '<button class="btn btn-danger" style="flex:1" onclick="deleteReport(' + r.id + ')">حذف</button>'
       + '</div>';
     grid.appendChild(card);
   });
@@ -1274,7 +1289,7 @@ function editAttendanceReport(id) {
 }
 function viewReport(id) {
   activeViewRepId = id; var r = db.reports.find(function(x) { return x.id == id; }); if (!r) return;
-  document.getElementById('repViewTitle').innerText = 'كشف ${r.group_name} (${r.report_date})';
+  document.getElementById('repViewTitle').innerText = 'كشف ' + r.group_name + ' (' + r.report_date + ')';
   document.getElementById('repSearch').value = ''; renderRepDetail(Object.entries(r.students_data || {}), r);
   if (db.user.role === 'teacher' && db.user.group === r.group_name) {
     setTimeout(function() {
@@ -1297,13 +1312,13 @@ function renderRepDetail(entries, r) {
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
     var extra = '';
     if (att.status === 'present') {
-      extra = '<p style="font-size:.85rem"><b>التسميع:</b> ${(att.today||'-')}</p><p style="font-size:.85rem"><b>التقييم:</b> ${(att.rating||'-')}</p><p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ${(att.required||'-')}</p>${((att.pages_done !== undefined && att.pages_done !== null && att.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + att.pages_done}</p>' : '');
-      if (att.revision && att.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ${att.revision.join('، ')}</p>';
-      if (att.achieveJuz && att.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء:</b> ${att.achieveJuz.join('، ')}</p>';
-      if (att.achievePages && att.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص${att.achieveFrom}→ص${att.achieveTo}</p>';
+      extra = '<p style="font-size:.85rem"><b>التسميع:</b> ' + (att.today||'-') + '</p><p style="font-size:.85rem"><b>التقييم:</b> ' + (att.rating||'-') + '</p><p style="font-size:.85rem"><b>المطلوب للمرة القادمة:</b> ' + (att.required||'-') + '</p>' + ((att.pages_done !== undefined && att.pages_done !== null && att.pages_done !== '') ? '<p style="font-size:.85rem"><b>كم صفحة أنجز:</b> ' + att.pages_done + '</p>' : '');
+      if (att.revision && att.revision.length) extra += '<p style="font-size:.85rem"><b>المراجعة:</b> ' + att.revision.join('، ') + '</p>';
+      if (att.achieveJuz && att.achieveJuz.length) extra += '<p style="font-size:.85rem"><b>الأجزاء:</b> ' + att.achieveJuz.join('، ') + '</p>';
+      if (att.achievePages && att.achievePages.length) extra += '<p style="font-size:.85rem"><b>الصفحات:</b> ص' + att.achieveFrom + '→ص' + att.achieveTo + '</p>';
     }
     var div = document.createElement('div'); div.className = 'att-row';
-    div.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:5px"><b>${(s ? s.name : 'محذوف')}</b><span class="sp ${att.status}">${sl}</span></div>' + extra;
+    div.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:5px"><b>' + (s ? s.name : 'محذوف') + '</b><span class="sp ' + att.status + '">' + sl + '</span></div>' + extra;
     list.appendChild(div);
   });
 }
@@ -1326,9 +1341,10 @@ function printRepById(id) {
     var sid = entry[0]; var att = entry[1];
     var s = db.students.find(function(x) { return x.id == sid; });
     var sl = att.status === 'present' ? 'حاضر' : att.status === 'absent_excused' ? 'غائب بعذر' : 'غائب';
-    rows += '<tr><td style="font-weight:bold;font-size:15px">${(s ? s.name : 'محذوف')}</td><td>${sl}</td><td>${(att.status==='present'?(att.today||'-'):'-')}</td><td>${(att.status==='present'?(att.rating||'-'):'-')}</td><td>${(att.status==='present'?(att.required||'-'):'-')}</td><td style="text-align:center">${(att.status==='present'?(att.pages_done||'-'):'-')}</td></tr>';
+    rows += '<tr><td style="font-weight:bold;font-size:15px">' + (s ? s.name : 'محذوف') + '</td><td>' + sl + '</td><td>' + (att.status==='present'?(att.today||'-'):'-') + '</td><td>' + (att.status==='present'?(att.rating||'-'):'-') + '</td><td>' + (att.status==='present'?(att.required||'-'):'-') + '</td><td style="text-align:center">' + (att.status==='present'?(att.pages_done||'-'):'-') + '</td></tr>';
   });
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${report.mosque}</h1><p><b>كشف حضور وتسميع:</b> ${report.group_name}</p><p>التاريخ: ${report.report_date} | المعلم: ${report.teacher_name}</p></div>${'<table><thead><tr><th style="width:20%">اسم الطالب</th><th style="width:10%">الحالة</th><th style="width:24%">التسميع</th><th style="width:12%">التقييم</th><th style="width:24%">المطلوب للمرة القادمة</th><th style="width:10%">صفحات</th></tr></thead><tbody>' + rows}</tbody></table>'
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — ' + report.mosque + '</h1><p><b>كشف حضور وتسميع:</b> ' + report.group_name + '</p><p>التاريخ: ' + report.report_date + ' | المعلم: ' + report.teacher_name + '</p></div>'
+    + '<table><thead><tr><th style="width:20%">اسم الطالب</th><th style="width:10%">الحالة</th><th style="width:24%">التسميع</th><th style="width:12%">التقييم</th><th style="width:24%">المطلوب للمرة القادمة</th><th style="width:10%">صفحات</th></tr></thead><tbody>' + rows + '</tbody></table>'
     + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>توقيع المشرف العام: ...............................</span></div>',
     'كشف ' + report.group_name);
 }
@@ -1340,11 +1356,13 @@ function printStudentsList() {
   var n = 1; var rows = '';
   groups.forEach(function(g) {
     var gS = list.filter(function(s) { return getGroup(s) === g; }); if (!gS.length) return;
-    rows += '<tr class="gh"><td colspan="5">${g} — ${gS.length} طلاب</td></tr>';
-    gS.forEach(function(s) { rows += '<tr><td>${(n++)}</td><td>${s.name}</td><td>${s.age}</td><td>${s.phone}</td><td>${getGroup(s)}</td></tr>'; });
+    rows += '<tr class="gh"><td colspan="5">' + g + ' — ' + gS.length + ' طلاب</td></tr>';
+    gS.forEach(function(s) { rows += '<tr><td>' + (n++) + '</td><td>' + s.name + '</td><td>' + s.age + '</td><td>' + s.phone + '</td><td>' + getGroup(s) + '</td></tr>'; });
   });
   var now = new Date();
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b>كشف أسماء الطلاب</b></p><p>التاريخ: ${now.toLocaleDateString('ar-EG')} | إجمالي الطلاب: ${list.length}</p></div>${'<table><thead><tr><th style="width:5%">#</th><th style="width:30%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:25%">رقم ولي الأمر</th><th style="width:30%">المجموعة</th></tr></thead><tbody>' + rows}</tbody></table>${'<div class="pf"><span>تاريخ الطباعة: ' + now.toLocaleDateString('ar-EG')}</span><span>توقيع المشرف العام: ...............................</span></div>',
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — ' + db.mosque + '</h1><p><b>كشف أسماء الطلاب</b></p><p>التاريخ: ' + now.toLocaleDateString('ar-EG') + ' | إجمالي الطلاب: ' + list.length + '</p></div>'
+    + '<table><thead><tr><th style="width:5%">#</th><th style="width:30%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:25%">رقم ولي الأمر</th><th style="width:30%">المجموعة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<div class="pf"><span>تاريخ الطباعة: ' + now.toLocaleDateString('ar-EG') + '</span><span>توقيع المشرف العام: ...............................</span></div>',
     'كشف الأسماء');
 }
 
@@ -1371,19 +1389,26 @@ function renderAbsStats() {
   var ct = document.getElementById('absContent'); var sd = getAbsData(fg, sq);
   if (!sd.length) { ct.innerHTML = '<p style="text-align:center;color:var(--gray);padding:20px">لا يوجد طلاب</p>'; return; }
   var ta=sd.reduce(function(s,x){return s+x.absOnly;},0); var hr=sd.filter(function(x){return x.absOnly>=8;}).length; var pf=sd.filter(function(x){return x.absOnly===0;}).length;
-  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:20px">${'<div style="background:#fee2e2;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:var(--danger)">'+ta}</div><div style="font-size:.8rem;color:var(--danger)">غياب بدون عذر</div></div>${'<div style="background:#fef9c3;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:#854d0e">'+hr}</div><div style="font-size:.8rem;color:#854d0e">يحتاجون متابعة</div></div>${'<div style="background:#dcfce7;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:#166534">'+pf}</div><div style="font-size:.8rem;color:#166534">لم يغيبوا</div></div>'
+  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:20px">'
+    +'<div style="background:#fee2e2;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:var(--danger)">'+ta+'</div><div style="font-size:.8rem;color:var(--danger)">غياب بدون عذر</div></div>'
+    +'<div style="background:#fef9c3;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:#854d0e">'+hr+'</div><div style="font-size:.8rem;color:#854d0e">يحتاجون متابعة</div></div>'
+    +'<div style="background:#dcfce7;border-radius:12px;padding:12px;text-align:center"><div style="font-size:1.8rem;font-weight:bold;color:#166534">'+pf+'</div><div style="font-size:.8rem;color:#166534">لم يغيبوا</div></div>'
     +'</div><div style="overflow-x:auto"><table class="abs-table"><thead><tr><th>الطالب</th><th>المجموعة</th><th>غياب</th><th>بعذر</th><th>حضور</th><th>نسبة الحضور</th><th>الحالة</th></tr></thead><tbody>';
   sd.forEach(function(d) {
     var bc=absLv(d.absOnly); var lbl=absLbl(d.absOnly); var bc2=d.pct>=80?'#22c55e':d.pct>=60?'#f59e0b':'#ef4444';
-    h+='<tr><td><b>${d.s.name}</b></td><td style="font-size:.78rem;color:var(--gray)">${getGroup(d.s)}</td><td style="text-align:center;color:var(--danger);font-weight:bold">${d.absOnly}</td><td style="text-align:center;color:#854d0e;font-weight:bold">${d.exc}</td><td style="text-align:center;color:#166534;font-weight:bold">${d.pre}</td>${'<td style="text-align:center;min-width:80px"><div style="background:#f1f5f9;border-radius:10px;height:8px;margin-bottom:4px;overflow:hidden"><div style="background:'+bc2};width:${d.pct}%;height:100%;border-radius:10px"></div></div><span style="font-size:.75rem">${d.pct}%</span></td>${'<td style="text-align:center"><span class="absbdg '+bc}">${lbl}</span></td></tr>';
+    h+='<tr><td><b>'+d.s.name+'</b></td><td style="font-size:.78rem;color:var(--gray)">'+getGroup(d.s)+'</td><td style="text-align:center;color:var(--danger);font-weight:bold">'+d.absOnly+'</td><td style="text-align:center;color:#854d0e;font-weight:bold">'+d.exc+'</td><td style="text-align:center;color:#166534;font-weight:bold">'+d.pre+'</td>'
+      +'<td style="text-align:center;min-width:80px"><div style="background:#f1f5f9;border-radius:10px;height:8px;margin-bottom:4px;overflow:hidden"><div style="background:'+bc2+';width:'+d.pct+'%;height:100%;border-radius:10px"></div></div><span style="font-size:.75rem">'+d.pct+'%</span></td>'
+      +'<td style="text-align:center"><span class="absbdg '+bc+'">'+lbl+'</span></td></tr>';
   });
   h+='</tbody></table></div>'; ct.innerHTML=h;
 }
 function printAbsStats() {
   var fg=document.getElementById('absFilter').value; var sq=document.getElementById('absSearch').value.trim(); var sd=getAbsData(fg,sq);
   var now=new Date(); var rows='';
-  sd.forEach(function(d){rows+='<tr><td>${d.s.name}</td><td>${getGroup(d.s)}</td><td style="text-align:center">${d.absOnly}</td><td style="text-align:center">${d.exc}</td><td style="text-align:center">${d.pre}</td><td style="text-align:center">${d.pct}%</td><td style="text-align:center">${absLbl(d.absOnly)}</td></tr>';});
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b>تقرير إحصائيات الغياب</b></p><p>${(fg==='all'?'كل المجموعات':fg)} | ${now.toLocaleDateString('ar-EG')}</p></div>${'<table><thead><tr><th>الطالب</th><th>المجموعة</th><th>غياب</th><th>بعذر</th><th>حضور</th><th>نسبة الحضور</th><th>الحالة</th></tr></thead><tbody>'+rows}</tbody></table>${'<div class="pf"><span>تاريخ التقرير: '+now.toLocaleDateString('ar-EG')}</span><span>توقيع المشرف: ...............................</span></div>',
+  sd.forEach(function(d){rows+='<tr><td>'+d.s.name+'</td><td>'+getGroup(d.s)+'</td><td style="text-align:center">'+d.absOnly+'</td><td style="text-align:center">'+d.exc+'</td><td style="text-align:center">'+d.pre+'</td><td style="text-align:center">'+d.pct+'%</td><td style="text-align:center">'+absLbl(d.absOnly)+'</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>تقرير إحصائيات الغياب</b></p><p>'+(fg==='all'?'كل المجموعات':fg)+' | '+now.toLocaleDateString('ar-EG')+'</p></div>'
+    +'<table><thead><tr><th>الطالب</th><th>المجموعة</th><th>غياب</th><th>بعذر</th><th>حضور</th><th>نسبة الحضور</th><th>الحالة</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="pf"><span>تاريخ التقرير: '+now.toLocaleDateString('ar-EG')+'</span><span>توقيع المشرف: ...............................</span></div>',
     'إحصائيات الغياب');
 }
 
@@ -1410,7 +1435,11 @@ function renderHifzList(students) {
     var mem=getHifz(s.id,curHifzJuz); var cnt=mem.length; var pct=total>0?Math.round((cnt/total)*100):0;
     var bc=pct>=80?'#22c55e':pct>=50?'#f59e0b':'#3b82f6';
     var item=document.createElement('div'); item.className='hifz-item';
-    item.innerHTML='<div style="flex:1;min-width:0"><div class="hifz-name">${s.name}</div><div class="hifz-prog">${cnt} / ${total} سورة (${pct}%)</div>${'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden"><div style="background:'+bc};width:${pct}%;height:100%;border-radius:10px"></div></div></div>${'<div style="display:flex;gap:8px;flex-shrink:0">'}<button class="btn btn-primary" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openSurahModal(${s.id})"> تسجيل</button>${'<button class="btn btn-info" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="viewHifzRep('+s.id})"> عرض</button>'
+    item.innerHTML='<div style="flex:1;min-width:0"><div class="hifz-name">'+s.name+'</div><div class="hifz-prog">'+cnt+' / '+total+' سورة ('+pct+'%)</div>'
+      +'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div></div>'
+      +'<div style="display:flex;gap:8px;flex-shrink:0">'
+      +'<button class="btn btn-primary" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openSurahModal('+s.id+')"> تسجيل</button>'
+      +'<button class="btn btn-info" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="viewHifzRep('+s.id+')"> عرض</button>'
       +'</div>';
     cont.appendChild(item);
   });
@@ -1423,7 +1452,7 @@ function openSurahModal(sid) {
   suwar.forEach(function(surah) {
     var checked=mem.includes(surah);
     var item=document.createElement('label'); item.className='sch-item'+(checked?' ck':'');
-    item.innerHTML='<input type="checkbox" value=\"${surah || ''}\"${(checked?' checked':'')} onchange="this.closest(\'.sch-item\').classList.toggle(\'ck\',this.checked)"><span>${surah}</span>';
+    item.innerHTML='<input type="checkbox" value="'+surah+'"'+(checked?' checked':'')+' onchange="this.closest(\'.sch-item\').classList.toggle(\'ck\',this.checked)"><span>'+surah+'</span>';
     grid.appendChild(item);
   });
   document.getElementById('surahModal').classList.remove('hidden');
@@ -1441,12 +1470,18 @@ function viewHifzReport() { viewHifzRep(curHifzSid); }
 function viewHifzRep(sid) {
   var s=db.students.find(function(x){return x.id==sid;}); var suwar=getSuwar(curHifzJuz); var mem=getHifz(sid,curHifzJuz);
   var remaining=suwar.filter(function(sr){return!mem.includes(sr);});
-  document.getElementById('hifzRepTitle').innerText=' ${(s?s.name:'')} — '+(curHifzJuz==='عم'?'جزء عم':'جزء تبارك');
+  document.getElementById('hifzRepTitle').innerText=' '+(s?s.name:'')+' — '+(curHifzJuz==='عم'?'جزء عم':'جزء تبارك');
   var pct=suwar.length>0?Math.round((mem.length/suwar.length)*100):0; var bc=pct>=80?'#22c55e':pct>=50?'#f59e0b':'#3b82f6';
-  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:16px;text-align:center">${'<div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+mem.length} / ${suwar.length}</div>${'<div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">سورة محفوظة</div>'}<div style="background:#e2e8f0;border-radius:10px;height:12px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:${bc};width:${pct}%;height:100%;border-radius:10px"></div></div>${'<div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct}%</div></div>'
+  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:16px;text-align:center">'
+    +'<div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+mem.length+' / '+suwar.length+'</div>'
+    +'<div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">سورة محفوظة</div>'
+    +'<div style="background:#e2e8f0;border-radius:10px;height:12px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
+    +'<div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct+'%</div></div>'
     +'<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>#</th><th>السورة</th><th>الحالة</th></tr></thead><tbody>';
-  suwar.forEach(function(sr,i){var done=mem.includes(sr);html+='<tr><td style="text-align:center">${(i+1)}</td><td>${sr}</td><td style="text-align:center">${(done?'<span style="color:#166534;font-weight:bold"> محفوظة</span>':'<span style="color:#991b1b"> متبقية</span>')}</td></tr>';});
-  html+='</tbody></table></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">${'<div style="flex:1;background:#dcfce7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:bold;color:#166534">'+mem.length}</div><div style="font-size:.8rem;color:#166534">محفوظة</div></div>${'<div style="flex:1;background:#fee2e2;border-radius:10px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:bold;color:#991b1b">'+remaining.length}</div><div style="font-size:.8rem;color:#991b1b">متبقية</div></div>'
+  suwar.forEach(function(sr,i){var done=mem.includes(sr);html+='<tr><td style="text-align:center">'+(i+1)+'</td><td>'+sr+'</td><td style="text-align:center">'+(done?'<span style="color:#166534;font-weight:bold"> محفوظة</span>':'<span style="color:#991b1b"> متبقية</span>')+'</td></tr>';});
+  html+='</tbody></table></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+    +'<div style="flex:1;background:#dcfce7;border-radius:10px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:bold;color:#166534">'+mem.length+'</div><div style="font-size:.8rem;color:#166534">محفوظة</div></div>'
+    +'<div style="flex:1;background:#fee2e2;border-radius:10px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:bold;color:#991b1b">'+remaining.length+'</div><div style="font-size:.8rem;color:#991b1b">متبقية</div></div>'
     +'</div>';
   document.getElementById('hifzRepContent').innerHTML=html; document.getElementById('hifzRepModal').classList.remove('hidden');
 }
@@ -1458,10 +1493,12 @@ function printHifzAll() {
   students.forEach(function(s,i){
     var mem=getHifz(s.id,curHifzJuz); var pct=total>0?Math.round((mem.length/total)*100):0;
     var grade = s.age || '-';
-    rows+='<tr><td style="text-align:center;font-weight:bold">${(i+1)}</td><td style="font-weight:bold;font-size:15px">${s.name}</td><td style="text-align:center;font-weight:bold">${grade}</td><td style="text-align:center;font-weight:bold;color:#064e3b">${mem.length}/${total} (${pct}%)</td><td style="font-size:10px;color:#166534">${(mem.length>0?mem.join(' · '):'-')}</td><td style="font-size:10px;color:#991b1b">${(suwar.filter(function(sr){return!mem.includes(sr);}).join(' · ')||'أتم الجزء ')}</td></tr>';
+    rows+='<tr><td style="text-align:center;font-weight:bold">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td style="text-align:center;font-weight:bold">'+grade+'</td><td style="text-align:center;font-weight:bold;color:#064e3b">'+mem.length+'/'+total+' ('+pct+'%)</td><td style="font-size:10px;color:#166534">'+(mem.length>0?mem.join(' · '):'-')+'</td><td style="font-size:10px;color:#991b1b">'+(suwar.filter(function(sr){return!mem.includes(sr);}).join(' · ')||'أتم الجزء ')+'</td></tr>';
   });
   var now=new Date();
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b>كشف متابعة الحفظ — ${juzName} — مجموعة الأشبال</b></p><p>التاريخ: ${now.toLocaleDateString('ar-EG')} | عدد الطلاب: ${students.length} | إجمالي السور: ${total}</p></div>${'<table><thead><tr><th style="width:4%">#</th><th style="width:18%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:12%">السور المحفوظة</th><th style="width:28%">السور المحفوظة</th><th style="width:28%">السور المتبقية</th></tr></thead><tbody>'+rows}</tbody></table>${'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')}</span></div>',
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b>كشف متابعة الحفظ — '+juzName+' — مجموعة الأشبال</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+' | عدد الطلاب: '+students.length+' | إجمالي السور: '+total+'</p></div>'
+    +'<table><thead><tr><th style="width:4%">#</th><th style="width:18%">اسم الطالب</th><th style="width:10%">الصف</th><th style="width:12%">السور المحفوظة</th><th style="width:28%">السور المحفوظة</th><th style="width:28%">السور المتبقية</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
     'كشف الحفظ - '+juzName);
 }
 
@@ -1497,8 +1534,16 @@ function openQiraahSheet(editId) {
     window.qiraahData[s.id] = JSON.parse(JSON.stringify(val));
     var row = document.createElement('div');
     row.className = 'att-row';
-    row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">${'<b style="color:#ea580c">' + s.name}</b>${'<select class="att-sel" style="max-width:160px;margin:0" onchange="window.qiraahData[' + s.id}].status=this.value;toggleQiraahAbsent(${s.id},this.value)">${'<option value="present"' + (val.status==='present'?' selected':'')}>حاضر</option><option value="absent"${(val.status==='absent'?' selected':'')}>غائب</option><option value="absent_excused"${(val.status==='absent_excused'?' selected':'')}>غائب بعذر</option></select></div>${'<div id="qiraahFields_' + s.id}">${'<label>القراءة:</label><input type="text" value=\"${(val.reading || '') || ''}\" placeholder="مثال: سورة البقرة 1-5" oninput="window.qiraahData[' + s.id}].reading=this.value">${'<label>التقييم:</label><select onchange="window.qiraahData[' + s.id}].rating=this.value">${RATINGS.map(function(r) { return '<option value=\"${r || ''}\"' + (val.rating === r ? ' selected' : '')}>${r}</option>'; }).join('')
-      + '</select>${'<label>القراءة في المرة القادمة:</label><input type="text" value=\"${(val.next || '') || ''}\" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id}].next=this.value">'
+    row.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<b style="color:#ea580c">' + s.name + '</b>'
+      + '<select class="att-sel" style="max-width:160px;margin:0" onchange="window.qiraahData[' + s.id + '].status=this.value;toggleQiraahAbsent(' + s.id + ',this.value)">'
+      + '<option value="present"' + (val.status==='present'?' selected':'') + '>حاضر</option><option value="absent"' + (val.status==='absent'?' selected':'') + '>غائب</option><option value="absent_excused"' + (val.status==='absent_excused'?' selected':'') + '>غائب بعذر</option></select></div>'
+      + '<div id="qiraahFields_' + s.id + '">'
+      + '<label>القراءة:</label><input type="text" value="' + (val.reading || '') + '" placeholder="مثال: سورة البقرة 1-5" oninput="window.qiraahData[' + s.id + '].reading=this.value">'
+      + '<label>التقييم:</label><select onchange="window.qiraahData[' + s.id + '].rating=this.value">'
+      + RATINGS.map(function(r) { return '<option value="' + r + '"' + (val.rating === r ? ' selected' : '') + '>' + r + '</option>'; }).join('')
+      + '</select>'
+      + '<label>القراءة في المرة القادمة:</label><input type="text" value="' + (val.next || '') + '" placeholder="مثال: سورة البقرة 6-10" oninput="window.qiraahData[' + s.id + '].next=this.value">'
       + '</div>';
     cont.appendChild(row);
     if (val.status === 'absent' || val.status === 'absent_excused') toggleQiraahAbsent(s.id, val.status);
@@ -1569,7 +1614,13 @@ function openQiraahArchive() {
   reps.forEach(function(r) {
     var card = document.createElement('div');
     card.className = 'rep-card';
-    card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">${'<b style="color:#ea580c">' + r.group_name}</b><small>${r.report_date}</small></div>${'<p style="font-size:.8rem">بإشراف: ' + (r.teacher_name || '-')}</p>${'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'}<button class="btn btn-orange" style="flex:1" onclick="viewQiraahRep(${r.id})">عرض</button>${'<button class="btn btn-info" style="flex:1" onclick="editQiraahRep(' + r.id})">تعديل</button>${'<button class="btn btn-gold" style="flex:1" onclick="printQiraahRep(' + r.id})">طباعة</button>'
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px">'
+      + '<b style="color:#ea580c">' + r.group_name + '</b><small>' + r.report_date + '</small></div>'
+      + '<p style="font-size:.8rem">بإشراف: ' + (r.teacher_name || '-') + '</p>'
+      + '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'
+      + '<button class="btn btn-orange" style="flex:1" onclick="viewQiraahRep(' + r.id + ')">عرض</button>'
+      + '<button class="btn btn-info" style="flex:1" onclick="editQiraahRep(' + r.id + ')">تعديل</button>'
+      + '<button class="btn btn-gold" style="flex:1" onclick="printQiraahRep(' + r.id + ')">طباعة</button>'
       + '</div>';
     grid.appendChild(card);
   });
@@ -1587,12 +1638,15 @@ function viewQiraahRep(id) {
   activeQiraahViewId = id;
   var r = db.qiraahReports.find(function(x){ return x.id == id; });
   if (!r) return;
-  document.getElementById('qiraahViewTitle').innerText = 'كشف القراءة — ${r.group_name} (${r.report_date})';
+  document.getElementById('qiraahViewTitle').innerText = 'كشف القراءة — ' + r.group_name + ' (' + r.report_date + ')';
   var html = '';
   Object.entries(r.students_data || {}).forEach(function(e) {
     var s = db.students.find(function(x){ return x.id == e[0]; });
     var d = e[1] || {};
-    html += '<div class="next-box"><b>${(s ? s.name : 'محذوف')}</b><br>${'<b>القراءة:</b> ' + (d.reading || '-')}<br>${'<b>التقييم:</b> ' + (d.rating || '-')}<br>${'<b>القراءة في المرة القادمة:</b> ' + (d.next || '-')}</div>';
+    html += '<div class="next-box"><b>' + (s ? s.name : 'محذوف') + '</b><br>'
+      + '<b>القراءة:</b> ' + (d.reading || '-') + '<br>'
+      + '<b>التقييم:</b> ' + (d.rating || '-') + '<br>'
+      + '<b>القراءة في المرة القادمة:</b> ' + (d.next || '-') + '</div>';
   });
   document.getElementById('qiraahViewContent').innerHTML = html || '<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات</p>';
   document.getElementById('qiraahViewModal').classList.remove('hidden');
@@ -1610,9 +1664,11 @@ function buildQiraahPrintHtml(reps, titleText) {
       var st = db.students.find(function(x){ return x.id == e[0]; });
       var d = e[1] || {};
       var status = d.status === 'absent' ? 'غائب' : d.status === 'absent_excused' ? 'غائب بعذر' : 'حاضر';
-      rows += '<tr><td style="text-align:center">${(idx + 1)}</td><td style="font-weight:bold;font-size:15px">${(st ? st.name : 'محذوف')}</td><td style="text-align:center">${status}</td><td>${(d.reading || '-')}</td><td style="text-align:center">${(d.rating || '-')}</td><td>${(d.next || '-')}</td></tr>';
+      rows += '<tr><td style="text-align:center">' + (idx + 1) + '</td><td style="font-weight:bold;font-size:15px">' + (st ? st.name : 'محذوف') + '</td><td style="text-align:center">' + status + '</td><td>' + (d.reading || '-') + '</td><td style="text-align:center">' + (d.rating || '-') + '</td><td>' + (d.next || '-') + '</td></tr>';
     });
-    html += '<div class="ph"><h1>دار القرآن الكريم — ${r.mosque}</h1><p><b>${titleText}</b></p><p>المجموعة: ${r.group_name} | التاريخ: ${r.report_date} | المعلم: ${(r.teacher_name || '-')}</p></div>${'<table><thead><tr><th style="width:5%">#</th><th style="width:22%">اسم الطالب</th><th style="width:12%">الحالة</th><th style="width:23%">القراءة</th><th style="width:13%">التقييم</th><th style="width:25%">القراءة في المرة القادمة</th></tr></thead><tbody>' + rows}</tbody></table>${'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: ' + (new Date()).toLocaleDateString('ar-EG')}</span></div>';
+    html += '<div class="ph"><h1>دار القرآن الكريم — ' + r.mosque + '</h1><p><b>' + titleText + '</b></p><p>المجموعة: ' + r.group_name + ' | التاريخ: ' + r.report_date + ' | المعلم: ' + (r.teacher_name || '-') + '</p></div>'
+      + '<table><thead><tr><th style="width:5%">#</th><th style="width:22%">اسم الطالب</th><th style="width:12%">الحالة</th><th style="width:23%">القراءة</th><th style="width:13%">التقييم</th><th style="width:25%">القراءة في المرة القادمة</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + '<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: ' + (new Date()).toLocaleDateString('ar-EG') + '</span></div>';
     if (ri < reps.length - 1) html += '<hr style="margin:18px 0;border:0;border-top:2px dashed #ddd">';
   });
   return html || '<p>لا توجد بيانات للطباعة</p>';
@@ -1645,7 +1701,10 @@ function openTajweedSheet(){
   ahlStudents().forEach(function(s){
     window.tajweedData[s.id]={rule:'',rating:'ممتاز',next:''};
     var row=document.createElement('div'); row.className='att-row';
-    row.innerHTML='<b style="color:#4338ca">${s.name}</b>${'<label>الحكم الذي تم أخذه:</label><input type="text" placeholder="مثال: أحكام النون الساكنة والتنوين" oninput="window.tajweedData['+s.id}].rule=this.value">${'<label>التقييم:</label><select onchange="window.tajweedData['+s.id}].rating=this.value">${RATINGS.map(function(r){return '<option value=\"${r || ''}\">'+r}</option>';}).join('')+'</select>${'<label>ما سيكون عليه المرة القادمة:</label><input type="text" placeholder="مثال: مراجعة الإدغام + تدريب على الإخفاء" oninput="window.tajweedData['+s.id}].next=this.value">';
+    row.innerHTML='<b style="color:#4338ca">'+s.name+'</b>'
+      +'<label>الحكم الذي تم أخذه:</label><input type="text" placeholder="مثال: أحكام النون الساكنة والتنوين" oninput="window.tajweedData['+s.id+'].rule=this.value">'
+      +'<label>التقييم:</label><select onchange="window.tajweedData['+s.id+'].rating=this.value">'+RATINGS.map(function(r){return '<option value="'+r+'">'+r+'</option>';}).join('')+'</select>'
+      +'<label>ما سيكون عليه المرة القادمة:</label><input type="text" placeholder="مثال: مراجعة الإدغام + تدريب على الإخفاء" oninput="window.tajweedData['+s.id+'].next=this.value">';
     cont.appendChild(row);
   });
   document.getElementById('tajweedSheetModal').classList.remove('hidden');
@@ -1664,8 +1723,8 @@ function openTajweedArchive(){
   var reps=(db.tajweedReports||[]).filter(function(r){return r.mosque===db.mosque;});
   if(!reps.length){grid.innerHTML='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد سجلات</p>';}
   reps.forEach(function(r){
-    var body=''; Object.entries(r.students_data||{}).forEach(function(e){var s=db.students.find(function(x){return x.id==e[0];});var d=e[1];body+='<div class="next-box"><b>${(s?s.name:'محذوف')}</b><br>الحكم: ${(d.rule||'-')}<br>التقييم: ${(d.rating||'-')}<br>المرة القادمة: ${(d.next||'-')}</div>';});
-    var card=document.createElement('div');card.className='rep-card';card.innerHTML='<b style="color:#4338ca">${r.report_date}</b><p style="font-size:.8rem">بإشراف: ${r.teacher_name}</p>'+body; grid.appendChild(card);
+    var body=''; Object.entries(r.students_data||{}).forEach(function(e){var s=db.students.find(function(x){return x.id==e[0];});var d=e[1];body+='<div class="next-box"><b>'+(s?s.name:'محذوف')+'</b><br>الحكم: '+(d.rule||'-')+'<br>التقييم: '+(d.rating||'-')+'<br>المرة القادمة: '+(d.next||'-')+'</div>';});
+    var card=document.createElement('div');card.className='rep-card';card.innerHTML='<b style="color:#4338ca">'+r.report_date+'</b><p style="font-size:.8rem">بإشراف: '+r.teacher_name+'</p>'+body; grid.appendChild(card);
   });
   document.getElementById('tajweedArchModal').classList.remove('hidden');
 }
@@ -1678,7 +1737,11 @@ function openTilawahSheet(){
   ahlStudents().forEach(function(s){
     window.tilawahData[s.id]={place:'',mistakes:'',rating:'ممتاز',next:''};
     var row=document.createElement('div'); row.className='att-row';
-    row.innerHTML='<b style="color:#ea580c">${s.name}</b>${'<label>موضع التلاوة:</label><input type="text" placeholder="مثال: سورة البقرة 1-10" oninput="window.tilawahData['+s.id}].place=this.value">${'<label>الأخطاء / الملاحظات:</label><input type="text" placeholder="مثال: مد، غنة، مخارج حروف" oninput="window.tilawahData['+s.id}].mistakes=this.value">${'<label>التقييم:</label><select onchange="window.tilawahData['+s.id}].rating=this.value">${RATINGS.map(function(r){return '<option value=\"${r || ''}\">'+r}</option>';}).join('')+'</select>${'<label>ما سيكون عليه المرة القادمة:</label><input type="text" placeholder="مثال: إعادة الآيات 1-5 مع تصحيح المدود" oninput="window.tilawahData['+s.id}].next=this.value">';
+    row.innerHTML='<b style="color:#ea580c">'+s.name+'</b>'
+      +'<label>موضع التلاوة:</label><input type="text" placeholder="مثال: سورة البقرة 1-10" oninput="window.tilawahData['+s.id+'].place=this.value">'
+      +'<label>الأخطاء / الملاحظات:</label><input type="text" placeholder="مثال: مد، غنة، مخارج حروف" oninput="window.tilawahData['+s.id+'].mistakes=this.value">'
+      +'<label>التقييم:</label><select onchange="window.tilawahData['+s.id+'].rating=this.value">'+RATINGS.map(function(r){return '<option value="'+r+'">'+r+'</option>';}).join('')+'</select>'
+      +'<label>ما سيكون عليه المرة القادمة:</label><input type="text" placeholder="مثال: إعادة الآيات 1-5 مع تصحيح المدود" oninput="window.tilawahData['+s.id+'].next=this.value">';
     cont.appendChild(row);
   });
   document.getElementById('tilawahSheetModal').classList.remove('hidden');
@@ -1697,8 +1760,8 @@ function openTilawahArchive(){
   var reps=(db.tilawahReports||[]).filter(function(r){return r.mosque===db.mosque;});
   if(!reps.length){grid.innerHTML='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد سجلات</p>';}
   reps.forEach(function(r){
-    var body=''; Object.entries(r.students_data||{}).forEach(function(e){var s=db.students.find(function(x){return x.id==e[0];});var d=e[1];body+='<div class="next-box"><b>${(s?s.name:'محذوف')}</b><br>الموضع: ${(d.place||'-')}<br>الأخطاء: ${(d.mistakes||'-')}<br>التقييم: ${(d.rating||'-')}<br>المرة القادمة: ${(d.next||'-')}</div>';});
-    var card=document.createElement('div');card.className='rep-card';card.innerHTML='<b style="color:#ea580c">${r.report_date}</b><p style="font-size:.8rem">بإشراف: ${r.teacher_name}</p>'+body; grid.appendChild(card);
+    var body=''; Object.entries(r.students_data||{}).forEach(function(e){var s=db.students.find(function(x){return x.id==e[0];});var d=e[1];body+='<div class="next-box"><b>'+(s?s.name:'محذوف')+'</b><br>الموضع: '+(d.place||'-')+'<br>الأخطاء: '+(d.mistakes||'-')+'<br>التقييم: '+(d.rating||'-')+'<br>المرة القادمة: '+(d.next||'-')+'</div>';});
+    var card=document.createElement('div');card.className='rep-card';card.innerHTML='<b style="color:#ea580c">'+r.report_date+'</b><p style="font-size:.8rem">بإشراف: '+r.teacher_name+'</p>'+body; grid.appendChild(card);
   });
   document.getElementById('tilawahArchModal').classList.remove('hidden');
 }
@@ -1722,16 +1785,16 @@ function openAdabSheet(editId) {
     var row = document.createElement('div'); row.className = 'adab-row';
     var btns = ADAB_OPTS.map(function(opt, i) {
       var cls = 'adab-opt' + (window.adabData[s.id].rating===opt ? ' ' + ADAB_CLS[i] : '');
-      return '<button type="button" class="${cls}" id="adOpt_${s.id}_${i}" onclick="selectAdab(${s.id},${i})">${opt}</button>';
+      return '<button type="button" class="'+cls+'" id="adOpt_'+s.id+'_'+i+'" onclick="selectAdab('+s.id+','+i+')">'+opt+'</button>';
     }).join('');
-    row.innerHTML = '<div class="adab-name">${s.name}<div style="font-size:.78rem;color:var(--gray)">${getGroup(s)}</div></div><div class="adab-btns">${btns}</div>';
+    row.innerHTML = '<div class="adab-name">'+s.name+'<div style="font-size:.78rem;color:var(--gray)">'+getGroup(s)+'</div></div><div class="adab-btns">'+btns+'</div>';
     cont.appendChild(row);
   });
   document.getElementById('adabSheetModal').classList.remove('hidden');
 }
 function selectAdab(sid, idx) {
   window.adabData[sid] = {rating: ADAB_OPTS[idx]};
-  ADAB_OPTS.forEach(function(_, i) { var el=document.getElementById('adOpt_${sid}_'+i); if(el) el.className='adab-opt'+(i===idx?' '+ADAB_CLS[idx]:''); });
+  ADAB_OPTS.forEach(function(_, i) { var el=document.getElementById('adOpt_'+sid+'_'+i); if(el) el.className='adab-opt'+(i===idx?' '+ADAB_CLS[idx]:''); });
 }
 async function saveAdabSheet() {
   var now=new Date();
@@ -1755,16 +1818,18 @@ function closeAdabSheet() { if (confirmExit()) document.getElementById('adabShee
 function printAdabCurrent() {
   var students=db.students.filter(function(s){return s.mosque===db.mosque&&(db.user.role==='admin'||getGroup(s)===db.user.group);});
   var rows='';
-  students.forEach(function(s,i){var d=window.adabData[s.id];var rating=d?d.rating:'ممتاز';var bg=ADAB_COLORS[rating]||'#fff';rows+='<tr><td style="text-align:center">${(i+1)}</td><td style="font-weight:bold;font-size:15px">${s.name}</td><td>${getGroup(s)}</td><td style="text-align:center;font-weight:bold;background:${bg}">${rating}</td></tr>';});
+  students.forEach(function(s,i){var d=window.adabData[s.id];var rating=d?d.rating:'ممتاز';var bg=ADAB_COLORS[rating]||'#fff';rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;font-weight:bold;background:'+bg+'">'+rating+'</td></tr>';});
   var now=new Date();
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b> كشف الآداب والأخلاق</b></p><p>التاريخ: ${now.toLocaleDateString('ar-EG')}</p></div>${'<table><thead><tr><th style="width:5%">#</th><th style="width:35%">اسم الطالب</th><th style="width:30%">المجموعة</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows}</tbody></table>${'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')}</span></div>',
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> كشف الآداب والأخلاق</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div>'
+    +'<table><thead><tr><th style="width:5%">#</th><th style="width:35%">اسم الطالب</th><th style="width:30%">المجموعة</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+now.toLocaleDateString('ar-EG')+'</span></div>',
     'كشف الآداب والأخلاق');
 }
 function openAdabArchive() {
   var grid=document.getElementById('adabArchGrid'); grid.innerHTML='';
   var reps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&(db.user.role==='admin'||r.group_name===db.user.group||r.group_name==='كل المجموعات');});
   if(!reps.length){grid.innerHTML='<p style="color:var(--gray);padding:20px;text-align:center">لا توجد سجلات بعد</p>';}
-  else reps.forEach(function(r){var card=document.createElement('div');card.className='rep-card';card.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:#e11d48">${r.group_name}</b><small>${r.report_date}</small></div><p style="font-size:.8rem">بإشراف: ${r.teacher_name}</p><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-rose" style="flex:1" onclick="viewAdabRep(${r.id})">عرض</button><button class="btn btn-info" style="flex:1" onclick="editAdabRep(${r.id})">تعديل</button><button class="btn btn-danger" style="flex:1" onclick="deleteAdab(${r.id})">حذف</button></div>';grid.appendChild(card);});
+  else reps.forEach(function(r){var card=document.createElement('div');card.className='rep-card';card.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px"><b style="color:#e11d48">'+r.group_name+'</b><small>'+r.report_date+'</small></div><p style="font-size:.8rem">بإشراف: '+r.teacher_name+'</p><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-rose" style="flex:1" onclick="viewAdabRep('+r.id+')">عرض</button><button class="btn btn-info" style="flex:1" onclick="editAdabRep('+r.id+')">تعديل</button><button class="btn btn-danger" style="flex:1" onclick="deleteAdab('+r.id+')">حذف</button></div>';grid.appendChild(card);});
   document.getElementById('adabArchModal').classList.remove('hidden');
 }
 function closeAdabArch() { if (confirmExit()) document.getElementById('adabArchModal').classList.add('hidden'); }
@@ -1774,9 +1839,9 @@ function editAdabRep(id){
 }
 function viewAdabRep(id) {
   activeAdabViewId=id; var r=db.adabReports.find(function(x){return x.id==id;});if(!r)return;
-  document.getElementById('adabViewTitle').innerText='كشف الآداب — ${r.group_name} (${r.report_date})';
+  document.getElementById('adabViewTitle').innerText='كشف الآداب — '+r.group_name+' ('+r.report_date+')';
   var html='';
-  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#f8fafc';html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:${bg}"><span style="font-weight:bold;font-size:15px">${(s?s.name:'محذوف')}</span><span style="font-weight:bold;font-size:15px">${d.rating}</span></div>';});
+  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#f8fafc';html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:'+bg+'"><span style="font-weight:bold;font-size:15px">'+(s?s.name:'محذوف')+'</span><span style="font-weight:bold;font-size:15px">'+d.rating+'</span></div>';});
   document.getElementById('adabViewContent').innerHTML=html||'<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات</p>';
   document.getElementById('adabViewModal').classList.remove('hidden');
 }
@@ -1784,8 +1849,10 @@ function closeAdabView() { if (confirmExit()) document.getElementById('adabViewM
 function printAdabView() {
   var r=db.adabReports.find(function(x){return x.id==activeAdabViewId;});if(!r)return;
   var rows='';var i=0;
-  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#fff';i++;rows+='<tr><td style="text-align:center">${i}</td><td style="font-weight:bold;font-size:15px">${(s?s.name:'محذوف')}</td><td style="text-align:center;font-weight:bold;background:${bg}">${d.rating}</td></tr>';});
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${r.mosque}</h1><p><b> كشف الآداب — ${r.group_name}</b></p><p>التاريخ: ${r.report_date} | المعلم: ${r.teacher_name}</p></div>${'<table><thead><tr><th style="width:5%">#</th><th style="width:65%">اسم الطالب</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows}</tbody></table>${'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+r.report_date}</span></div>',
+  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=entry[1];var s=db.students.find(function(x){return x.id==sid;});var bg=ADAB_COLORS[d.rating]||'#fff';i++;rows+='<tr><td style="text-align:center">'+i+'</td><td style="font-weight:bold;font-size:15px">'+(s?s.name:'محذوف')+'</td><td style="text-align:center;font-weight:bold;background:'+bg+'">'+d.rating+'</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+r.mosque+'</h1><p><b> كشف الآداب — '+r.group_name+'</b></p><p>التاريخ: '+r.report_date+' | المعلم: '+r.teacher_name+'</p></div>'
+    +'<table><thead><tr><th style="width:5%">#</th><th style="width:65%">اسم الطالب</th><th style="width:30%">التقييم</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+r.report_date+'</span></div>',
     'كشف الآداب');
 }
 async function deleteAdab(id) {
@@ -1809,7 +1876,9 @@ function renderChartList(students) {
   if(!students.length){cont.innerHTML='<p style="color:var(--gray);text-align:center;padding:20px">لا يوجد طلاب</p>';return;}
   students.forEach(function(s){
     var row=document.createElement('div');row.style.cssText='background:white;border-radius:12px;border:1px solid var(--bdr);padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px';
-    row.innerHTML='<div><div style="font-weight:bold;font-size:1rem;color:var(--primary)">${s.name}</div><div style="font-size:.82rem;color:var(--gray)">${getGroup(s)}</div></div>${'<div style="display:flex;gap:8px;flex-wrap:wrap">'}<button class="btn btn-rose" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openStdChart(${s.id},\'adab\')"> عرض إحصائية الآداب والأخلاق</button>'
+    row.innerHTML='<div><div style="font-weight:bold;font-size:1rem;color:var(--primary)">'+s.name+'</div><div style="font-size:.82rem;color:var(--gray)">'+getGroup(s)+'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<button class="btn btn-rose" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openStdChart('+s.id+',\'adab\')"> عرض إحصائية الآداب والأخلاق</button>'
       +'</div>';
     cont.appendChild(row);
   });
@@ -1818,7 +1887,7 @@ function openStdChart(sid, type) {
   curChartSid = sid;
   curChartType = type;
   var s = db.students.find(function(x){return x.id==sid;});
-  document.getElementById('stdChartTitle').innerText = ' ${(s?s.name:'')} — ' + (type==='adab'?'الآداب والأخلاق':'إنجاز الحفظ');
+  document.getElementById('stdChartTitle').innerText = ' ' + (s?s.name:'') + ' — ' + (type==='adab'?'الآداب والأخلاق':'إنجاز الحفظ');
   var cont = document.getElementById('stdChartContent');
   cont.innerHTML = '';
 
@@ -1827,22 +1896,23 @@ function openStdChart(sid, type) {
     var adabReps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid];}).sort(function(a,b){return a.id-b.id;});
     adabReps.forEach(function(r){var d=r.students_data[sid];if(d&&counts[d.rating]!==undefined)counts[d.rating]++;});
     var total=adabReps.length;
-    var html='<div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center"><div style="font-size:1.4rem;font-weight:bold;color:var(--primary)">${total}</div><div style="color:var(--gray);font-size:.82rem">إجمالي تقييمات الأدب</div></div>';
+    var html='<div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center"><div style="font-size:1.4rem;font-weight:bold;color:var(--primary)">'+total+'</div><div style="color:var(--gray);font-size:.82rem">إجمالي تقييمات الأدب</div></div>';
     Object.keys(counts).forEach(function(k){
       var pct=total?Math.round((counts[k]/total)*100):0;
-      html+='<div class="bar-row"><div class="bar-lbl">${k}</div><div class="bar-bg"><div class="bar-fill" style="background:${(ADAB_COLORS[k]||'#ddd')};width:${pct}%"></div></div><div class="bar-val">${counts[k]}</div></div>';
+      html+='<div class="bar-row"><div class="bar-lbl">'+k+'</div><div class="bar-bg"><div class="bar-fill" style="background:'+(ADAB_COLORS[k]||'#ddd')+';width:'+pct+'%"></div></div><div class="bar-val">'+counts[k]+'</div></div>';
     });
     cont.innerHTML=html;
   } else {
     var trend = getHifzTrendData(sid);
     var totalPages = getTotalPages(sid);
-    var html2='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:12px;text-align:center">${'<div style="font-size:2rem;font-weight:bold;color:#4d7c0f">'+totalPages}</div>'
+    var html2='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:12px;text-align:center">'
+      +'<div style="font-size:2rem;font-weight:bold;color:#4d7c0f">'+totalPages+'</div>'
       +'<div style="color:var(--gray);font-size:.85rem">إجمالي الصفحات المنجزة</div></div>';
     if (!trend.length) html2+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز بعد</p>';
     else {
       html2+='<canvas id="hifzChartCanvas" height="180"></canvas>';
       html2+='<div style="margin-top:15px;overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>';
-      trend.forEach(function(x){ html2+='<tr><td>${x.date}</td><td>${(x.data.today||'-')}</td><td style="text-align:center">${x.pages}</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">${x.total}</td></tr>'; });
+      trend.forEach(function(x){ html2+='<tr><td>'+x.date+'</td><td>'+(x.data.today||'-')+'</td><td style="text-align:center">'+x.pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+x.total+'</td></tr>'; });
       html2+='</tbody></table></div>';
     }
     cont.innerHTML=html2;
@@ -1860,8 +1930,8 @@ function printStdChart(){
   var sid=curChartSid;var s=db.students.find(function(x){return x.id==sid;});
   if(curChartType==='hifz'){
     var trend=getHifzTrendData(sid);var rows='';
-    trend.forEach(function(x){rows+='<tr><td>${x.date}</td><td>${(x.data.today||'-')}</td><td style="text-align:center">${x.pages}</td><td style="text-align:center">${x.total}</td></tr>';});
-    doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b> إحصائية إنجاز الحفظ</b></p><p>الطالب: ${(s?s.name:'')} | المجموع: ${getTotalPages(sid)} صفحة</p></div><table><thead><tr><th>التاريخ</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>${rows}</tbody></table>','إحصائية '+(s?s.name:''));
+    trend.forEach(function(x){rows+='<tr><td>'+x.date+'</td><td>'+(x.data.today||'-')+'</td><td style="text-align:center">'+x.pages+'</td><td style="text-align:center">'+x.total+'</td></tr>';});
+    doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> إحصائية إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | المجموع: '+getTotalPages(sid)+' صفحة</p></div><table><thead><tr><th>التاريخ</th><th>ما تم</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>','إحصائية '+(s?s.name:''));
   } else {
     doPrint(document.getElementById('stdChartContent').innerHTML,'إحصائية '+(s?s.name:''));
   }
@@ -1873,9 +1943,10 @@ function printAllCharts(){
     var adabRps=db.adabReports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[s.id];});
     var acnts={'ممتاز':0,'جيد جداً':0,'جيد':0,'سيء':0,'غائب':0};adabRps.forEach(function(r){var d=r.students_data[s.id];if(d&&acnts[d.rating]!==undefined)acnts[d.rating]++;});
     var topA=adabRps.length>0?Object.entries(acnts).sort(function(a,b){return b[1]-a[1];})[0][0]:'-';
-    rows+='<tr><td style="text-align:center">${(i+1)}</td><td style="font-weight:bold;font-size:15px">${s.name}</td><td>${getGroup(s)}</td><td style="text-align:center;color:#991b1b">${absOnly}</td><td style="text-align:center">${topA}</td></tr>';
+    rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;color:#991b1b">'+absOnly+'</td><td style="text-align:center">'+topA+'</td></tr>';
   });
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b> ملخص إحصائيات الآداب والأخلاق</b></p><p>التاريخ: ${now.toLocaleDateString('ar-EG')}</p></div>${'<table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>الغياب</th><th>أكثر تقييم أدبي</th></tr></thead><tbody>'+rows}</tbody></table>',
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> ملخص إحصائيات الآداب والأخلاق</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div>'
+    +'<table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>الغياب</th><th>أكثر تقييم أدبي</th></tr></thead><tbody>'+rows+'</tbody></table>',
     'إحصائيات الآداب والأخلاق');
 }
 
@@ -1916,7 +1987,9 @@ function openHifzPagesSheet(editReportId, editStudentId) {
 
     var row=document.createElement('div');
     row.className='att-row';
-    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">${'<div><b style="color:#4d7c0f">'+s.name}</b><div style="font-size:.8rem;color:var(--gray)">${getGroup(s)}</div></div>${'<input type="number" min="0" step="0.5" id="hifzPage_'+s.id}" value=\"${oldPages || ''}\" placeholder="عدد الصفحات" style="max-width:170px;margin:0">'
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      + '<div><b style="color:#4d7c0f">'+s.name+'</b><div style="font-size:.8rem;color:var(--gray)">'+getGroup(s)+'</div></div>'
+      + '<input type="number" min="0" step="0.5" id="hifzPage_'+s.id+'" value="'+oldPages+'" placeholder="عدد الصفحات" style="max-width:170px;margin:0">'
       + '</div>';
     cont.appendChild(row);
   });
@@ -2006,7 +2079,10 @@ function renderAchieveList(students){
   students.forEach(function(s){
     var tp=getTotalPages(s.id);var pct=Math.min(100,Math.round((tp/604)*100));var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
     var row=document.createElement('div');row.style.cssText='background:white;border-radius:12px;border:1px solid var(--bdr);padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px';
-    row.innerHTML='<div style="flex:1;min-width:150px"><div style="font-weight:bold;font-size:1rem;color:var(--primary)">${s.name}</div><div style="font-size:.82rem;color:var(--gray)">${getGroup(s)}</div>${'<div style="font-size:.9rem;color:#4d7c0f;margin-top:3px;font-weight:bold">'+tp} صفحة من 604 (${pct}%)</div>${'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden;max-width:240px"><div style="background:'+bc};width:${pct}%;height:100%;border-radius:10px"></div></div>${'</div><button class="btn btn-lime" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openAchieveDetail('+s.id})"> عرض | طباعة</button>';
+    row.innerHTML='<div style="flex:1;min-width:150px"><div style="font-weight:bold;font-size:1rem;color:var(--primary)">'+s.name+'</div><div style="font-size:.82rem;color:var(--gray)">'+getGroup(s)+'</div>'
+      +'<div style="font-size:.9rem;color:#4d7c0f;margin-top:3px;font-weight:bold">'+tp+' صفحة من 604 ('+pct+'%)</div>'
+      +'<div style="background:#f1f5f9;border-radius:10px;height:6px;margin-top:6px;overflow:hidden;max-width:240px"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div>'
+      +'</div><button class="btn btn-lime" style="min-height:38px;padding:8px 14px;font-size:.82rem" onclick="openAchieveDetail('+s.id+')"> عرض | طباعة</button>';
     cont.appendChild(row);
   });
 }
@@ -2015,11 +2091,11 @@ function openAchieveDetail(sid){
   document.getElementById('achDetailTitle').innerText=' إنجاز حفظ: '+(s?s.name:'');
   var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&getPagesDoneValue(r.students_data[sid])>0;}).sort(function(a,b){return a.id-b.id;});
   var total=0;var rows='';
-  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>${r.report_date}</td><td>${(d.follow_type||'حفظ')}</td><td style="text-align:center">${pages}</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">${total}</td><td style="text-align:center;white-space:nowrap"><button class="btn btn-primary" style="min-height:34px;padding:6px 10px;font-size:.78rem;margin-left:5px" onclick="openHifzPagesSheet(${r.id},${sid})"> تعديل</button><button class="btn btn-danger" style="min-height:34px;padding:6px 10px;font-size:.78rem" onclick="deleteHifzPagesRecord(${r.id},${sid})"> حذف</button></td></tr>';});
+  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+total+'</td><td style="text-align:center;white-space:nowrap"><button class="btn btn-primary" style="min-height:34px;padding:6px 10px;font-size:.78rem;margin-left:5px" onclick="openHifzPagesSheet('+r.id+','+sid+')"> تعديل</button><button class="btn btn-danger" style="min-height:34px;padding:6px 10px;font-size:.78rem" onclick="deleteHifzPagesRecord('+r.id+','+sid+')"> حذف</button></td></tr>';});
   var pct=Math.min(100,Math.round((total/604)*100));var bc=pct>=50?'#22c55e':pct>=25?'#f59e0b':'#3b82f6';
-  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;text-align:center"><div style="font-size:2rem;font-weight:bold;color:var(--primary)">${total} / 604</div><div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">صفحة منجزة</div><div style="background:#e2e8f0;border-radius:10px;height:14px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:${bc};width:${pct}%;height:100%;border-radius:10px"></div></div><div style="font-size:.9rem;margin-top:6px;font-weight:bold">${pct}%</div></div>';
+  var html='<div style="background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;text-align:center"><div style="font-size:2rem;font-weight:bold;color:var(--primary)">'+total+' / 604</div><div style="color:var(--gray);font-size:.85rem;margin-bottom:8px">صفحة منجزة</div><div style="background:#e2e8f0;border-radius:10px;height:14px;overflow:hidden;max-width:300px;margin:0 auto"><div style="background:'+bc+';width:'+pct+'%;height:100%;border-radius:10px"></div></div><div style="font-size:.9rem;margin-top:6px;font-weight:bold">'+pct+'%</div></div>';
   if(!reps.length) html+='<p style="text-align:center;color:var(--gray);padding:20px">لا توجد بيانات إنجاز مسجلة</p>';
-  else html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table></div>';
+  else html+='<div style="overflow-x:auto"><table class="hrep-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th><th>إجراءات</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   document.getElementById('achDetailContent').innerHTML=html;document.getElementById('achieveDetailModal').classList.remove('hidden');
 }
 
@@ -2069,13 +2145,13 @@ function printOneAchieve(){
   var sid=curAchieveSid;var s=db.students.find(function(x){return x.id==sid;});
   var reps=db.reports.filter(function(r){return r.mosque===db.mosque&&r.students_data&&r.students_data[sid]&&getPagesDoneValue(r.students_data[sid])>0;}).sort(function(a,b){return a.id-b.id;});
   var total=0;var rows='';
-  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>${r.report_date}</td><td>${(d.follow_type||'حفظ')}</td><td style="text-align:center">${pages}</td><td style="text-align:center">${total}</td></tr>';});
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b> إنجاز الحفظ</b></p><p>الطالب: ${(s?s.name:'')} | ${(s?getGroup(s):'')} | إجمالي الصفحات: ${total}</p></div><table><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>${rows}</tbody></table>','إنجاز حفظ '+(s?s.name:''));
+  reps.forEach(function(r){var d=r.students_data[sid];var pages=getPagesDoneValue(d);total+=pages;rows+='<tr><td>'+r.report_date+'</td><td>'+(d.follow_type||'حفظ')+'</td><td style="text-align:center">'+pages+'</td><td style="text-align:center">'+total+'</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> إنجاز الحفظ</b></p><p>الطالب: '+(s?s.name:'')+' | '+(s?getGroup(s):'')+' | إجمالي الصفحات: '+total+'</p></div><table><thead><tr><th>التاريخ</th><th>النوع</th><th>صفحات اليوم</th><th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>','إنجاز حفظ '+(s?s.name:''));
 }
 function printAllAchieve(){
   var now=new Date();var rows='';
-  allAchieveStudents.forEach(function(s,i){var tp=getTotalPages(s.id);var pct=Math.min(100,Math.round((tp/604)*100));rows+='<tr><td style="text-align:center">${(i+1)}</td><td style="font-weight:bold;font-size:15px">${s.name}</td><td>${getGroup(s)}</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">${tp}</td><td style="text-align:center">${pct}%</td></tr>';});
-  doPrint('<div class="ph"><h1>دار القرآن الكريم — ${db.mosque}</h1><p><b> كشف إنجاز الحفظ — جميع الطلاب</b></p><p>التاريخ: ${now.toLocaleDateString('ar-EG')}</p></div><table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>إجمالي الصفحات</th><th>النسبة</th></tr></thead><tbody>${rows}</tbody></table>','إنجاز الحفظ');
+  allAchieveStudents.forEach(function(s,i){var tp=getTotalPages(s.id);var pct=Math.min(100,Math.round((tp/604)*100));rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold;font-size:15px">'+s.name+'</td><td>'+getGroup(s)+'</td><td style="text-align:center;font-weight:bold;color:#4d7c0f">'+tp+'</td><td style="text-align:center">'+pct+'%</td></tr>';});
+  doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> كشف إنجاز الحفظ — جميع الطلاب</b></p><p>التاريخ: '+now.toLocaleDateString('ar-EG')+'</p></div><table><thead><tr><th>#</th><th>اسم الطالب</th><th>المجموعة</th><th>إجمالي الصفحات</th><th>النسبة</th></tr></thead><tbody>'+rows+'</tbody></table>','إنجاز الحفظ');
 }
 
 
@@ -2122,28 +2198,5 @@ startSalatReminder();
   document.addEventListener('DOMContentLoaded',function(){ setTimeout(markReveal,300); });
   var t=setInterval(markReveal,1200);
   setTimeout(function(){clearInterval(t)},12000);
-})();</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-  const allowedKeywords = ["أسعد", "Asaad", "شاهين", "Shaheen"];
-
-  document.querySelectorAll('*').forEach(function(el){
-    try {
-      const text = (el.textContent || "").trim();
-      if (!text) return;
-
-      const isSheikh = text.includes("شيخ") || text.includes("الشيخ");
-      const allowed = allowedKeywords.some(k => text.includes(k));
-
-      if (isSheikh && !allowed) {
-        el.style.display = "none";
-      }
-    } catch(e){}
-  });
-
-});
-</script>
-
-</body>
+})();</script></body>
 </html>
