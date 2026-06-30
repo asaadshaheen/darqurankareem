@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>دار القرآن الكريم - النسخة النهائية الشاملة 5</title>
+<title>دار القرآن الكريم - النسخة النهائية الشاملة 6</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>:root{--primary:#064e3b;--pl:#059669;--sec:#b45309;--danger:#be123c;--bg:#f8fafc;--text:#0f172a;--gray:#64748b;--bdr:#e2e8f0;}
 *{box-sizing:border-box;font-family:'Tajawal',sans-serif;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -64,8 +64,9 @@ select.adab-score{font-weight:bold;border-width:2px}
 .a-ex{background:#dcfce7;border-color:#22c55e;color:#166534}
 .a-g2{background:#dbeafe;border-color:#3b82f6;color:#1e40af}
 .a-gd{background:#fef9c3;border-color:#f59e0b;color:#854d0e}
-.a-bd{background:#fee2e2;border-color:#ef4444;color:#991b1b}
-.a-ab{background:#f1f5f9;border-color:#94a3b8;color:#475569}
+.a-bd{background:#ffedd5;border-color:#f97316;color:#9a3412}
+.a-na{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.a-ab{background:#e5e7eb;border-color:#6b7280;color:#374151}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .bar-lbl{width:90px;font-size:.85rem;font-weight:bold;text-align:right;flex-shrink:0}
 .bar-bg{flex:1;background:#f1f5f9;border-radius:8px;height:22px;overflow:hidden}
@@ -361,7 +362,7 @@ function sbSelect(table, orderCol, orderDesc) {
 </div></div><!-- Modal: الآداب والأخلاق -->
 <div id="adabModal" class="modal hidden"><div class="mc" style="max-width:700px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> الآداب والأخلاق</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-rose" style="min-height:38px" onclick="openAdabSheet()"> تسجيل كشف</button><button class="btn btn-gold" style="min-height:38px" onclick="openAdabArchive()"> سجلات الآداب</button><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabModal()">إغلاق</button></div></div><div style="text-align:center;padding:40px;color:var(--gray)"><div style="font-size:3rem"></div><p style="margin-top:10px">اختر (تسجيل كشف) لإضافة تقييم جديد<br>أو (سجلات الآداب) لعرض التقييمات السابقة</p></div>
 </div></div><!-- Modal: تسجيل كشف الآداب -->
-<div id="adabSheetModal" class="modal hidden"><div class="mc" style="max-width:820px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> تسجيل كشف الآداب والأخلاق <small style="font-size:.65rem;color:#64748b">(قوائم ملونة)</small></h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabSheet()">إغلاق</button></div><div style="background:#f8fafc;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-weight:bold;color:#e11d48;margin-bottom:8px">حدد اليوم والتاريخ</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><div><label style="margin-top:0">اليوم</label><select id="adabDay" onchange="applyAttendanceToAdabRows()"><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div><div><label style="margin-top:0">التاريخ</label><input type="date" id="adabDate" required onchange="syncAdabDay();applyAttendanceToAdabRows()"></div></div><div id="adabAttendanceNotice" style="margin-top:10px;font-size:.86rem;color:#166534;font-weight:bold;background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:8px">يتم ربط الحضور والغياب تلقائياً من كشف اليوم لنفس التاريخ.</div></div><div class="srch"><input type="search" id="adabSearch" placeholder="ابحث عن طالب..." oninput="filterAdabRows()"></div><div id="adabSheetRows"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-rose" style="flex:1" onclick="saveAdabSheet()"> حفظ الكشف</button><button class="btn btn-gold" style="flex:1" onclick="printAdabCurrent()"> طباعة الكل</button></div>
+<div id="adabSheetModal" class="modal hidden"><div class="mc" style="max-width:820px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> تسجيل كشف الآداب والأخلاق <small style="font-size:.65rem;color:#64748b">(قوائم ملونة + غير مقبول)</small></h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabSheet()">إغلاق</button></div><div style="background:#f8fafc;border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-weight:bold;color:#e11d48;margin-bottom:8px">حدد اليوم والتاريخ</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><div><label style="margin-top:0">اليوم</label><select id="adabDay" onchange="applyAttendanceToAdabRows()"><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div><div><label style="margin-top:0">التاريخ</label><input type="date" id="adabDate" required onchange="syncAdabDay();applyAttendanceToAdabRows()"></div></div><div id="adabAttendanceNotice" style="margin-top:10px;font-size:.86rem;color:#166534;font-weight:bold;background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:8px">يتم ربط الحضور والغياب تلقائياً من كشف اليوم لنفس التاريخ.</div></div><div class="srch"><input type="search" id="adabSearch" placeholder="ابحث عن طالب..." oninput="filterAdabRows()"></div><div id="adabSheetRows"></div><div style="display:flex;gap:10px;margin-top:20px;position:sticky;bottom:0;background:white;padding:10px 0;border-top:1px solid #eee"><button class="btn btn-rose" style="flex:1" onclick="saveAdabSheet()"> حفظ الكشف</button><button class="btn btn-gold" style="flex:1" onclick="printAdabCurrent()"> طباعة الكل</button></div>
 </div></div><!-- Modal: سجلات الآداب -->
 <div id="adabArchModal" class="modal hidden"><div class="mc" style="max-width:700px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:8px"><h2 style="color:#e11d48"> سجلات الآداب والأخلاق</h2><button class="btn btn-danger" style="min-height:38px" onclick="closeAdabArch()">إغلاق</button></div><div id="adabArchGrid" class="rep-grid"></div>
 </div></div><!-- Modal: عرض سجل آداب -->
@@ -413,6 +414,16 @@ const PCSS = [
   "td{padding:9px 8px;border:1px solid #111;text-align:center;vertical-align:middle;font-size:15px;font-weight:600;line-height:1.45}",
   "td:first-child,td:nth-child(2){font-size:16px;font-weight:800;color:#0f172a}",
   "tr:nth-child(even) td{background:#f8fafc}",
+  ".adab-status{display:inline-block;padding:4px 11px;border-radius:999px;border:2px solid transparent;font-weight:800;font-size:13px;line-height:1.2;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}",
+  ".a-ex{background:#dcfce7!important;border-color:#22c55e!important;color:#166534!important}",
+  ".a-g2{background:#dbeafe!important;border-color:#3b82f6!important;color:#1e40af!important}",
+  ".a-gd{background:#fef9c3!important;border-color:#f59e0b!important;color:#854d0e!important}",
+  ".a-bd{background:#ffedd5!important;border-color:#f97316!important;color:#9a3412!important}",
+  ".a-na{background:#fee2e2!important;border-color:#ef4444!important;color:#991b1b!important}",
+  ".a-ab{background:#e5e7eb!important;border-color:#6b7280!important;color:#374151!important}",
+  ".present{background:#dcfce7!important;border-color:#22c55e!important;color:#166534!important}",
+  ".absent{background:#fee2e2!important;border-color:#ef4444!important;color:#991b1b!important}",
+  ".absent_excused{background:#fef9c3!important;border-color:#f59e0b!important;color:#854d0e!important}",
   ".gh td{background:#b45309!important;color:white!important;font-weight:800;text-align:center;font-size:16px;padding:10px}",
   ".pf{margin-top:18px;display:flex;justify-content:space-between;font-size:14px;border-top:1px solid #999;padding-top:8px;font-weight:700}",
   ".br{display:flex;align-items:center;gap:8px;margin-bottom:7px}",
@@ -657,9 +668,16 @@ function renderExpenses(){
 var GROUPS = ['مجموعة أهل القرآن', 'مجموعة الفتية', 'مجموعة الأشبال'];
 var RATINGS = ['ممتاز', 'جيد جداً', 'جيد', 'يحتاج تحسين'];
 var HIDE_GROUPS = ['مجموعة أهل القرآن', 'مجموعة الفتية'];
-var ADAB_OPTS = ['ممتاز', 'جيد جدا', 'جيد', 'مقبول'];
-var ADAB_CLS  = ['a-ex', 'a-g2', 'a-gd', 'a-bd'];
-var ADAB_COLORS = {'ممتاز':'#dcfce7','جيد جدا':'#dbeafe','جيد':'#fef9c3','مقبول':'#fee2e2','غائب':'#f1f5f9'};
+var ADAB_OPTS = ['ممتاز', 'جيد جدا', 'جيد', 'مقبول', 'غير مقبول'];
+var ADAB_CLS  = ['a-ex', 'a-g2', 'a-gd', 'a-bd', 'a-na'];
+var ADAB_COLORS = {
+  'ممتاز':       {bg:'#dcfce7', border:'#22c55e', color:'#166534'},
+  'جيد جدا':    {bg:'#dbeafe', border:'#3b82f6', color:'#1e40af'},
+  'جيد':        {bg:'#fef9c3', border:'#f59e0b', color:'#854d0e'},
+  'مقبول':      {bg:'#ffedd5', border:'#f97316', color:'#9a3412'},
+  'غير مقبول': {bg:'#fee2e2', border:'#ef4444', color:'#991b1b'},
+  'غائب':       {bg:'#e5e7eb', border:'#6b7280', color:'#374151'}
+};
 
 var SUWAR_AMMA = ['النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
 var SUWAR_TABARAK = ['الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات'];
@@ -1887,11 +1905,19 @@ function attendanceStatusLabel(status) {
 }
 function adabRatingClass(rating) {
   rating = normalizeAdabRating(rating);
-  return {'ممتاز':'a-ex','جيد جدا':'a-g2','جيد':'a-gd','مقبول':'a-bd','غائب':'a-ab'}[rating] || 'a-ex';
+  return {'ممتاز':'a-ex','جيد جدا':'a-g2','جيد':'a-gd','مقبول':'a-bd','غير مقبول':'a-na','غائب':'a-ab'}[rating] || 'a-ex';
+}
+function adabRatingPalette(rating) {
+  rating = normalizeAdabRating(rating);
+  return ADAB_COLORS[rating] || ADAB_COLORS['ممتاز'];
+}
+function adabRatingInlineStyle(rating) {
+  var c = adabRatingPalette(rating);
+  return 'background:' + c.bg + '!important;border-color:' + c.border + '!important;color:' + c.color + '!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;font-weight:bold';
 }
 function adabRatingScore(rating) {
   rating = normalizeAdabRating(rating);
-  return {'ممتاز':10,'جيد جدا':8,'جيد':6,'مقبول':4,'غائب':0}[rating] ?? 10;
+  return {'ممتاز':10,'جيد جدا':8,'جيد':6,'مقبول':4,'غير مقبول':2,'غائب':0}[rating] ?? 10;
 }
 function normalizeAdabRating(value) {
   if (value === null || value === undefined || value === '') return 'ممتاز';
@@ -1900,17 +1926,24 @@ function normalizeAdabRating(value) {
     if (n >= 9) return 'ممتاز';
     if (n >= 7) return 'جيد جدا';
     if (n >= 5) return 'جيد';
-    return 'مقبول';
+    if (n >= 3) return 'مقبول';
+    return 'غير مقبول';
   }
   var text = String(value).trim();
   if (text === 'جيد جداً') return 'جيد جدا';
-  if (text === 'سيء') return 'مقبول';
-  if (text === 'غائب') return 'غائب';
+  if (text === 'سيء' || text === 'ضعيف' || text === 'غير جيد') return 'غير مقبول';
+  if (text === 'يحتاج تحسين') return 'مقبول';
+  if (text === 'غائب' || text === 'غائب بعذر') return 'غائب';
   return ADAB_OPTS.includes(text) ? text : 'ممتاز';
 }
 function styleAdabSelect(sel) {
   if (!sel) return;
   sel.className = 'adab-score ' + adabRatingClass(sel.value);
+  var c = adabRatingPalette(sel.value);
+  sel.style.background = c.bg;
+  sel.style.borderColor = c.border;
+  sel.style.color = c.color;
+  sel.style.fontWeight = 'bold';
 }
 function normalizeAdabData(old) {
   old = old || {};
@@ -1930,7 +1963,7 @@ function adabRatingOptions(selected) {
   selected = normalizeAdabRating(selected);
   var html = '';
   ADAB_OPTS.forEach(function(opt) {
-    html += '<option value="' + opt + '"' + (opt === selected ? ' selected' : '') + '>' + opt + '</option>';
+    html += '<option value="' + opt + '" style="' + adabRatingInlineStyle(opt) + '"' + (opt === selected ? ' selected' : '') + '>' + opt + '</option>';
   });
   return html;
 }
@@ -1939,7 +1972,11 @@ function adabTotal(data) {
 }
 function adabRatingBadge(value) {
   var rating = normalizeAdabRating(value);
-  return '<span class="adab-status ' + adabRatingClass(rating) + '" style="margin:0">' + rating + '</span>';
+  return '<span class="adab-status ' + adabRatingClass(rating) + '" style="margin:0;' + adabRatingInlineStyle(rating) + '">' + rating + '</span>';
+}
+function attendanceStatusBadge(status) {
+  status = normalizeAttendanceStatus(status);
+  return '<span class="adab-status ' + status + '" style="margin:0">' + attendanceStatusLabel(status) + '</span>';
 }
 function getAttendanceMapForAdab(dateValue) {
   var map = {};
@@ -2093,7 +2130,7 @@ function printAdabCurrent() {
   var students=db.students.filter(function(s){return s.mosque===db.mosque&&(db.user.role==='admin'||getGroup(s)===db.user.group);});
   var rows='';
   applyAttendanceToAdabRows();
-  students.forEach(function(s,i){var d=normalizeAdabData(window.adabData[s.id]);rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td style="text-align:center">'+attendanceStatusLabel(d.status)+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+adabRatingBadge(d[field.key])+'</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
+  students.forEach(function(s,i){var d=normalizeAdabData(window.adabData[s.id]);rows+='<tr><td style="text-align:center">'+(i+1)+'</td><td style="font-weight:bold">'+s.name+'</td><td style="text-align:center">'+attendanceStatusBadge(d.status)+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+adabRatingBadge(d[field.key])+'</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
   var dateValue=document.getElementById('adabDate').value;var dayValue=document.getElementById('adabDay').value;var selectedDate=dateValue?new Date(dateValue+'T00:00:00'):new Date();var reportDate=dayValue+' - '+selectedDate.toLocaleDateString('ar-EG');
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+db.mosque+'</h1><p><b> كشف الآداب والأخلاق</b></p><p>اليوم والتاريخ: '+reportDate+'</p></div>'
     +'<table><thead><tr><th>#</th><th>اسم الطالب</th><th>الحالة</th>'+ADAB_FIELDS.map(function(field){return '<th>'+field.label+'</th>';}).join('')+'<th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>'
@@ -2131,7 +2168,7 @@ function closeAdabView() { if (confirmExit()) document.getElementById('adabViewM
 function printAdabView() {
   var r=db.adabReports.find(function(x){return x.id==activeAdabViewId;});if(!r)return;
   var rows='';var i=0;
-  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=normalizeAdabData(entry[1]);var s=db.students.find(function(x){return x.id==sid;});i++;rows+='<tr><td style="text-align:center">'+i+'</td><td style="font-weight:bold">'+(s?s.name:'محذوف')+'</td><td style="text-align:center">'+attendanceStatusLabel(d.status)+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+adabRatingBadge(d[field.key])+'</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
+  Object.entries(r.students_data||{}).forEach(function(entry){var sid=entry[0];var d=normalizeAdabData(entry[1]);var s=db.students.find(function(x){return x.id==sid;});i++;rows+='<tr><td style="text-align:center">'+i+'</td><td style="font-weight:bold">'+(s?s.name:'محذوف')+'</td><td style="text-align:center">'+attendanceStatusBadge(d.status)+'</td>'+ADAB_FIELDS.map(function(field){return '<td style="text-align:center">'+adabRatingBadge(d[field.key])+'</td>';}).join('')+'<td style="text-align:center;font-weight:bold">'+adabTotal(d)+'/50</td></tr>';});
   doPrint('<div class="ph"><h1>دار القرآن الكريم — '+r.mosque+'</h1><p><b> كشف الآداب — '+r.group_name+'</b></p><p>التاريخ: '+r.report_date+' | المعلم: '+r.teacher_name+'</p></div>'
     +'<table><thead><tr><th>#</th><th>اسم الطالب</th><th>الحالة</th>'+ADAB_FIELDS.map(function(field){return '<th>'+field.label+'</th>';}).join('')+'<th>المجموع</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'<div class="pf"><span>توقيع المعلم: ...............................</span><span>تاريخ الطباعة: '+r.report_date+'</span></div>',
